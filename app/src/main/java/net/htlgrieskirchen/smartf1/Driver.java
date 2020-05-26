@@ -9,10 +9,10 @@ public class Driver {
     private String familyName;
     private String dateOfBirth;
     private String nationality;
-    private String constructorName;
+    private Constructor[] constructors;
 
-    public Driver(String driverid, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, String constructorName) {
-        this.driverid = driverid;
+    public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality,  Constructor[] constructors) {
+        this.driverid = driverId;
         this.permanentNumber = permanentNumber;
         this.code = code;
         this.url = url;
@@ -20,9 +20,9 @@ public class Driver {
         this.familyName = familyName;
         this.dateOfBirth = dateOfBirth;
         this.nationality = nationality;
-        this.constructorName = constructorName;
-    }
 
+        this.constructors = constructors;
+    }
 
     public String getDriverid() {
         return driverid;
@@ -88,15 +88,13 @@ public class Driver {
         this.nationality = nationality;
     }
 
-    public String getConstructorName() {
-        return constructorName;
+    public Constructor[] getConstructors() {
+        return constructors;
     }
 
-    public void setConstructorName(String constructorName) {
-        this.constructorName = constructorName;
+    public void setConstructors(Constructor[] constructors) {
+        this.constructors = constructors;
     }
-
-
 }
 
 
