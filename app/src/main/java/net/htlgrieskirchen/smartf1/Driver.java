@@ -1,53 +1,83 @@
 package net.htlgrieskirchen.smartf1;
 
 public class Driver {
-
-    private String firstname;
-    private String lastname;
-    private String wins;
+    private String driverid;
+    private String permanentNumber;
+    private String code;
+    private String url;
+    private String givenName;
+    private String familyName;
+    private String dateOfBirth;
     private String nationality;
-    private String points;
-    private String constructor;
-    private String position;
+    private String constructorName;
 
-
-    public String getFirstname() {
-        return firstname;
-    }
-
-    public Driver(String firstname, String lastname, String wins, String nationality, String points, String constructor, String position) {
-        this.firstname = firstname;
-        this.lastname = lastname;
-        this.wins = wins;
+    public Driver(String driverid, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, String constructorName) {
+        this.driverid = driverid;
+        this.permanentNumber = permanentNumber;
+        this.code = code;
+        this.url = url;
+        this.givenName = givenName;
+        this.familyName = familyName;
+        this.dateOfBirth = dateOfBirth;
         this.nationality = nationality;
-        this.points = points;
-        this.constructor = constructor;
-        this.position = position;
+        this.constructorName = constructorName;
     }
 
-    public void setFirstname(String firstname) {
-        this.firstname = firstname;
+
+    public String getDriverid() {
+        return driverid;
     }
 
-    @Override
-    public String toString() {
-        return position+" "+firstname+" "+lastname+", "+constructor+", Punkte: "+points;
+    public void setDriverid(String driverid) {
+        this.driverid = driverid;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getPermanentNumber() {
+        return permanentNumber;
     }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
+    public void setPermanentNumber(String permanentNumber) {
+        this.permanentNumber = permanentNumber;
     }
 
-    public String getWins() {
-        return wins;
+    public String getCode() {
+        return code;
     }
 
-    public void setWins(String wins) {
-        this.wins = wins;
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getGivenName() {
+        return givenName;
+    }
+
+    public void setGivenName(String givenName) {
+        this.givenName = givenName;
+    }
+
+    public String getFamilyName() {
+        return familyName;
+    }
+
+    public void setFamilyName(String familyName) {
+        this.familyName = familyName;
+    }
+
+    public String getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(String dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
     public String getNationality() {
@@ -58,27 +88,16 @@ public class Driver {
         this.nationality = nationality;
     }
 
-    public String getPoints() {
-        return points;
+    public String getConstructorName() {
+        return constructorName;
     }
 
-    public void setPoints(String points) {
-        this.points = points;
+    public void setConstructorName(String constructorName) {
+        this.constructorName = constructorName;
     }
 
-    public String getConstructor() {
-        return constructor;
-    }
 
-    public void setConstructor(String constructor) {
-        this.constructor = constructor;
-    }
-
-    public String getPosition() {
-        return position;
-    }
-
-    public void setPosition(String position) {
-        this.position = position;
-    }
 }
+
+
+
