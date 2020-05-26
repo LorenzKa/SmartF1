@@ -1,67 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent" >
 
-    <TextView
-        android:id="@+id/position"
+    <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:fontFamily="@font/driverconstructor"
-        android:padding="5sp"
-        android:textColor="@color/colorFont"
-        android:textSize="17dp" />
-
-/>
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal">
+        android:layout_weight="1.3">
 
         <TextView
-            android:id="@+id/drivername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:id="@+id/position"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10sp"
             android:fontFamily="@font/driverconstructor"
-            android:padding="5sp"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:text="TextView"
             android:textColor="@color/colorFont"
-            android:textSize="17dp" />
+            android:textSize="30dp" />
+    </TableRow>
 
-    </LinearLayout>
-    <LinearLayout
+    <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:padding="5sp">
+        android:layout_weight="0.35">
 
-        <TextView
-            android:id="@+id/constructor"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:textColor="@color/colorFont"
-            android:textSize="17dp"
-            android:fontFamily="@font/driverconstructor"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:text="TextView" />
+            android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/number"
-            android:layout_width="match_parent"
-            android:textColor="@color/colorFont"
-            android:textSize="17dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:fontFamily="@font/drivernumb"
-            android:padding="5sp"
-            android:text="TextView" />
-    </LinearLayout>
+            <TextView
+                android:id="@+id/drivername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/driverconstructor"
+                android:padding="5sp"
+                android:text="TextView"
+                android:textColor="@color/colorFont"
+                android:textSize="17dp" />
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+
+                <TextView
+
+                    android:id="@+id/constructor"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/driverconstructor"
+                    android:padding="5sp"
+                    android:text="TextView"
+                    android:textColor="@color/colorFont"
+                    android:textSize="17dp" />
+
+                <TextView
+                    android:id="@+id/number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:fontFamily="@font/drivernumb"
+                    android:gravity="right"
+                    android:padding="5sp"
+                    android:text="TextView"
+                    android:textSize="17dp" />
+
+            </TableRow>
+
+        </LinearLayout>
+
+    </TableRow>
 
 </LinearLayout>
