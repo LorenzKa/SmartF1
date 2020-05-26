@@ -6,19 +6,14 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -34,21 +29,24 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem Mrace_calendar;
     private MenuItem Msettings;
     private ListView currentChampionship;
-    private ArrayAdapter<Driver> adapter;
+    private Adapter adapter;
     private ArrayList<Driver> driverList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        currentChampionship = (ListView) findViewById(R.id.listview_championship);
-        driverList = new ArrayList<>();
-        adapter = new ArrayAdapter<Driver>(this, android.R.layout.simple_list_item_1, driverList);
-        currentChampionship.setAdapter(adapter);
+
         ServerTask st = new ServerTask("2019", true);
         st.execute();
-    }
+        currentChampionship = (ListView) findViewById(R.id.listview_championship);
+        driverList = new ArrayList<>();
+        adapter = new Adapter(this, R.layout.item, driverList);
+        currentChampionship.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        System.out.println(driverList);
 
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -58,16 +56,10 @@ public class MainActivity extends AppCompatActivity {
         Msettings = menu.findItem(R.id.settings);
         return super.onCreateOptionsMenu(menu);
     }
-
-
 public class ServerTask extends AsyncTask<String, Integer, String> {
-    private MainActivity activity;
-    private ProgressBar mProgressBar;
     private final String baseURL = "http://ergast.com/api/f1/";
     private String year;
     private boolean driverStandings;
-    private List<Driver> drivers;
-    private boolean executed = false;
 
     public ServerTask(String year, boolean driverStandings) {
         this.year = year;
@@ -80,6 +72,14 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
     }
 
     @Override
+    protected void onPostExecute(String s) {
+        super.onPostExecute(s);
+        currentChampionship.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+        System.out.println(driverList.toString());
+    }
+
+    @Override
     protected void onProgressUpdate(Integer... values) {
         super.onProgressUpdate(values);
     }
@@ -88,7 +88,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
     protected String doInBackground(String... strings) {
         String sJsonResponse = "";
         String typeOfStanding;
-        ArrayList<Driver> driversList = new ArrayList<>();
+        ArrayList<Driver> driverArrayList = new ArrayList<>();
         if (driverStandings) {
             typeOfStanding = "driverStandings";
             try {
@@ -103,7 +103,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     while ((line = reader.readLine()) != null) {
                         stringBuilder.append(line);
                     }
-
                     String jsonResponse = stringBuilder.toString();
                     JSONObject jsonObject = new JSONObject(jsonResponse);
                     JSONObject mrdata = jsonObject.getJSONObject("MRData");
@@ -133,10 +132,10 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                         Constructor[] constructorsArray = new Constructor[constructorList.size()];
                         constructorList.toArray(constructorsArray);
                         driverClassed.setConstructors(constructorsArray);
-                        driversList.add(driverClassed);
+                        driverArrayList.add(driverClassed);
                     }
                     System.out.println("done");
-                    drivers = driversList;
+                    driverList.addAll(driverArrayList);
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -177,7 +176,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
             }
             return sJsonResponse;
         }
-
     }
 }
 }

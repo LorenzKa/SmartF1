@@ -3,6 +3,7 @@ package net.htlgrieskirchen.smartf1;
 import android.accounts.NetworkErrorException;
 import android.icu.text.IDNA;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
@@ -155,7 +156,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
     public List<Driver> getDrivers() {
         return drivers;
     }
-
     public boolean isExecuted() {
         return executed;
     }

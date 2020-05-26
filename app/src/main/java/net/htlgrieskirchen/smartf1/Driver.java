@@ -1,5 +1,7 @@
 package net.htlgrieskirchen.smartf1;
 
+import java.util.Arrays;
+
 public class Driver {
     private String driverid;
     private String permanentNumber;
@@ -11,7 +13,22 @@ public class Driver {
     private String nationality;
     private Constructor[] constructors;
 
-    public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality,  Constructor[] constructors) {
+    @Override
+    public String toString() {
+        return "Driver{" +
+                "driverid='" + driverid + '\'' +
+                ", permanentNumber='" + permanentNumber + '\'' +
+                ", code='" + code + '\'' +
+                ", url='" + url + '\'' +
+                ", givenName='" + givenName + '\'' +
+                ", familyName='" + familyName + '\'' +
+                ", dateOfBirth='" + dateOfBirth + '\'' +
+                ", nationality='" + nationality + '\'' +
+                ", constructors=" + Arrays.toString(constructors) +
+                '}';
+    }
+
+    public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, Constructor[] constructors) {
         this.driverid = driverId;
         this.permanentNumber = permanentNumber;
         this.code = code;
@@ -96,6 +113,3 @@ public class Driver {
         this.constructors = constructors;
     }
 }
-
-
-
