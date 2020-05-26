@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SmartF1</string>
+
+    <string name="current_championship">Stand der Meisterschaft</string>
+    <string name="past_championships">Vergangene Meisterschaften</string>
+    <string name="race_calendar">Rennkalender</string>
+    <string name="circuit_overview">Strecken Übersicht</string>
+    <string name="driver_overview">Fahrer Übersicht</string>
+    <string name="setting">Einstellungen</string>
+
 </resources>
