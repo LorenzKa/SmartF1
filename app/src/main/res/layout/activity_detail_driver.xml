@@ -8,6 +8,12 @@
     android:orientation="vertical"
     tools:context=".DetailDriver">
 
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="236dp"
+        app:srcCompat="@drawable/ic_launcher_background" />
+
     <TextView
         android:id="@+id/driver"
         android:layout_width="match_parent"
