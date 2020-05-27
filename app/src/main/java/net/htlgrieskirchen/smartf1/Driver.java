@@ -115,19 +115,19 @@ public class Driver  {
         this.constructors = constructors;
     }
 
-    public void setSeasonWins(String seasonWins) {
-        seasonWins = seasonWins;
-    }
-
-    public void setSeasonPoints(String seasonPoints) {
-        seasonPoints = seasonPoints;
-    }
-
     public String getSeasonWins() {
         return seasonWins;
     }
 
+    public void setSeasonWins(String seasonWins) {
+        this.seasonWins = seasonWins;
+    }
+
     public String getSeasonPoints() {
         return seasonPoints;
+    }
+
+    public void setSeasonPoints(String seasonPoints) {
+        this.seasonPoints = seasonPoints;
     }
 }

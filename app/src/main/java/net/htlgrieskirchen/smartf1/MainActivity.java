@@ -148,13 +148,15 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     Gson gson = builder.create();
                     for (int i = 0; i < driversArray.length(); i++) {
                         JSONObject driverAndConstructor = driversArray.getJSONObject(i);
-                       // String seasonWins = driverAndConstructor.getString("wins");
-                       // String seasonPoints = driverAndConstructor.getString("points");
+
                         JSONObject driver = driverAndConstructor.getJSONObject("Driver");
                         JsonElement driverElement = parser.parse(driver.toString());
+
                         Driver driverClassed = gson.fromJson(driverElement, Driver.class);
-                       // driverClassed.setSeasonPoints(seasonPoints);
-                       // driverClassed.setSeasonWins(seasonWins);
+                        String seasonWins = driverAndConstructor.getString("wins");
+                        String seasonPoints = driverAndConstructor.getString("points");
+                        driverClassed.setSeasonPoints(seasonPoints);
+                        driverClassed.setSeasonWins(seasonWins);
                         JSONArray constructors = driverAndConstructor.getJSONArray("Constructors");
                         List<Constructor> constructorList = new ArrayList<>();
                         for (int j = 0; j < constructors.length(); j++) {
@@ -164,6 +166,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                                     , Constructor.class);
                             constructorList.add(constructor);
                         }
+
                         Constructor[] constructorsArray = new Constructor[constructorList.size()];
                         constructorList.toArray(constructorsArray);
                         driverClassed.setConstructors(constructorsArray);
@@ -259,13 +262,13 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                 Gson gson = builder.create();
                 for (int i = 0; i < driversArray.length(); i++) {
                     JSONObject driverAndConstructor = driversArray.getJSONObject(i);
-                    // String seasonWins = driverAndConstructor.getString("wins");
-                    // String seasonPoints = driverAndConstructor.getString("points");
+                    String seasonWins = driverAndConstructor.getString("wins");
+                    String seasonPoints = driverAndConstructor.getString("points");
                     JSONObject driver = driverAndConstructor.getJSONObject("Driver");
                     JsonElement driverElement = parser.parse(driver.toString());
                     Driver driverClassed = gson.fromJson(driverElement, Driver.class);
-                    // driverClassed.setSeasonPoints(seasonPoints);
-                    // driverClassed.setSeasonWins(seasonWins);
+                    driverClassed.setSeasonPoints(seasonPoints);
+                    driverClassed.setSeasonWins(seasonWins);
                     JSONArray constructors = driverAndConstructor.getJSONArray("Constructors");
                     List<Constructor> constructorList = new ArrayList<>();
                     for (int j = 0; j < constructors.length(); j++) {
