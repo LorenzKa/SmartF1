@@ -20,7 +20,24 @@ public class Driver  {
     private String age;
     private String nationality;
     private Constructor[] constructors;
+    private String SeasonWins;
+    private String SeasonPoints;
 
+    public void setSeasonWins(String seasonWins) {
+        SeasonWins = seasonWins;
+    }
+
+    public void setSeasonPoints(String seasonPoints) {
+        SeasonPoints = seasonPoints;
+    }
+
+    public String getSeasonWins() {
+        return SeasonWins;
+    }
+
+    public String getSeasonPoints() {
+        return SeasonPoints;
+    }
 
     public String format(){
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");

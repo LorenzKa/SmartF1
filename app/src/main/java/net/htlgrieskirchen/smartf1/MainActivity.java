@@ -133,10 +133,13 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     Gson gson = builder.create();
                     for (int i = 0; i < driversArray.length(); i++) {
                         JSONObject driverAndConstructor = driversArray.getJSONObject(i);
+                        String seasonWins = driverAndConstructor.getString("wins");
+                        String seasonPoints = driverAndConstructor.getString("points");
                         JSONObject driver = driverAndConstructor.getJSONObject("Driver");
                         JsonElement driverElement = parser.parse(driver.toString());
                         Driver driverClassed = gson.fromJson(driverElement, Driver.class);
-
+                        driverClassed.setSeasonPoints(seasonPoints);
+                        driverClassed.setSeasonWins(seasonWins);
                         JSONArray constructors = driverAndConstructor.getJSONArray("Constructors");
                         List<Constructor> constructorList = new ArrayList<>();
                         for (int j = 0; j < constructors.length(); j++) {
