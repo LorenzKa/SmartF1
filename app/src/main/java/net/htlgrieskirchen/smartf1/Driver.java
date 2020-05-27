@@ -20,60 +20,16 @@ public class Driver  {
     private String age;
     private String nationality;
     private Constructor[] constructors;
-    private String SeasonWins;
-    private String SeasonPoints;
+    private String seasonWins;
+    private String seasonPoints;
 
-    public void setSeasonWins(String seasonWins) {
-        SeasonWins = seasonWins;
-    }
-
-    public void setSeasonPoints(String seasonPoints) {
-        SeasonPoints = seasonPoints;
-    }
-
-    public String getSeasonWins() {
-        return SeasonWins;
-    }
-
-    public String getSeasonPoints() {
-        return SeasonPoints;
-    }
-
-    public String format(){
-        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-        try {
-            Date date = sdf.parse(dateOfBirth);
-            dateOfBirth = sdf.format(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return dateOfBirth;
-    }
-
-    public String Calcage(){
-        int age = 0;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-
-            Date birth = sdf.parse(dateOfBirth);
-            Date d = new Date();
-
-            LocalDate birthday = birth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            LocalDate now = d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
-             age = Period.between(birthday, now).getYears();
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return String.valueOf(age);
-    }
 
     @Override
     public String toString() {
-        return driverid+","+permanentNumber+","+code+","+url+","+givenName+","+familyName+","+dateOfBirth+","+nationality+","+constructors.toString();
+        return driverid+","+permanentNumber+","+code+","+url+","+givenName+","+familyName+","+dateOfBirth+","+nationality+","+constructors.toString()+","+seasonWins+","+seasonPoints;
     }
 
-    public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, Constructor[] constructors) {
+    public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, Constructor[] constructors, String seasonWins, String seasonPoints) {
         this.driverid = driverId;
         this.permanentNumber = permanentNumber;
         this.code = code;
@@ -83,6 +39,8 @@ public class Driver  {
         this.dateOfBirth = dateOfBirth;
         this.nationality = nationality;
         this.constructors = constructors;
+        this.seasonWins = seasonWins;
+        this.seasonPoints = seasonPoints;
     }
 
     public String getDriverid() {
@@ -155,5 +113,21 @@ public class Driver  {
 
     public void setConstructors(Constructor[] constructors) {
         this.constructors = constructors;
+    }
+
+    public void setSeasonWins(String seasonWins) {
+        seasonWins = seasonWins;
+    }
+
+    public void setSeasonPoints(String seasonPoints) {
+        seasonPoints = seasonPoints;
+    }
+
+    public String getSeasonWins() {
+        return seasonWins;
+    }
+
+    public String getSeasonPoints() {
+        return seasonPoints;
     }
 }

@@ -2,9 +2,14 @@ package net.htlgrieskirchen.smartf1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +23,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -35,20 +44,27 @@ public class MainActivity extends AppCompatActivity {
     private ListView currentChampionship;
     private Adapter adapter;
     private ArrayList<Driver> driverList;
+    private static final String FILE_NAME = "drivers.json";
+    private String jsonResponse;
+    ArrayList<Driver> driverArrayList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        ServerTask st = new ServerTask("2019", true);
-        st.execute();
-        currentChampionship = (ListView) findViewById(R.id.listview_championship);
         driverList = new ArrayList<>();
+        System.out.println(driverList);
+        if (Connection()){
+            ServerTask st = new ServerTask("2019", true);
+            st.execute();
+        }{
+          load();
+        }
+        currentChampionship = (ListView) findViewById(R.id.listview_championship);
         adapter = new Adapter(this, R.layout.item, driverList);
         currentChampionship.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-        System.out.println(driverList);
 
         currentChampionship.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -93,7 +109,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
         super.onPostExecute(s);
         currentChampionship.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-        System.out.println(driverList.toString());
+        wirteFile();
     }
 
     @Override
@@ -105,7 +121,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
     protected String doInBackground(String... strings) {
         String sJsonResponse = "";
         String typeOfStanding;
-        ArrayList<Driver> driverArrayList = new ArrayList<>();
         if (driverStandings) {
             typeOfStanding = "driverStandings";
             try {
@@ -120,7 +135,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     while ((line = reader.readLine()) != null) {
                         stringBuilder.append(line);
                     }
-                    String jsonResponse = stringBuilder.toString();
+                    jsonResponse = stringBuilder.toString();
                     JSONObject jsonObject = new JSONObject(jsonResponse);
                     JSONObject mrdata = jsonObject.getJSONObject("MRData");
                     JSONObject standingstable = mrdata.getJSONObject("StandingsTable");
@@ -133,13 +148,13 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     Gson gson = builder.create();
                     for (int i = 0; i < driversArray.length(); i++) {
                         JSONObject driverAndConstructor = driversArray.getJSONObject(i);
-                        String seasonWins = driverAndConstructor.getString("wins");
-                        String seasonPoints = driverAndConstructor.getString("points");
+                       // String seasonWins = driverAndConstructor.getString("wins");
+                       // String seasonPoints = driverAndConstructor.getString("points");
                         JSONObject driver = driverAndConstructor.getJSONObject("Driver");
                         JsonElement driverElement = parser.parse(driver.toString());
                         Driver driverClassed = gson.fromJson(driverElement, Driver.class);
-                        driverClassed.setSeasonPoints(seasonPoints);
-                        driverClassed.setSeasonWins(seasonWins);
+                       // driverClassed.setSeasonPoints(seasonPoints);
+                       // driverClassed.setSeasonWins(seasonWins);
                         JSONArray constructors = driverAndConstructor.getJSONArray("Constructors");
                         List<Constructor> constructorList = new ArrayList<>();
                         for (int j = 0; j < constructors.length(); j++) {
@@ -154,7 +169,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                         driverClassed.setConstructors(constructorsArray);
                         driverArrayList.add(driverClassed);
                     }
-                    System.out.println("done");
+
                     driverList.addAll(driverArrayList);
                     return jsonResponse;
                 } else {
@@ -180,12 +195,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
                     while ((line = reader.readLine()) != null) {
                         stringBuilder.append(line);
                     }
-
-                    String jsonResponse = stringBuilder.toString();
-                    GsonBuilder builder = new GsonBuilder();
-                    Gson gson = builder.create();
-
-
                 } else {
                     return "ErrorCodeFromAPI";
 
@@ -198,4 +207,131 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
         }
     }
 }
+
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
+    }
+    private void wirteFile(){
+        if(isExternalStorageWritable()){
+            File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+            try {
+                FileOutputStream output = new FileOutputStream(textFile);
+                output.write(jsonResponse.getBytes());
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private void load(){
+        String response = readExternalStorage();
+        driverList = new ArrayList<>();
+        try {
+           // JSONArray jsonarray = new JSONArray(response);
+
+            //if (jsonarray.length() > 0) {
+                JSONObject jsonObject = new JSONObject(response);
+                JSONObject mrdata = jsonObject.getJSONObject("MRData");
+                JSONObject standingstable = mrdata.getJSONObject("StandingsTable");
+                JSONArray standingsList = standingstable.getJSONArray("StandingsLists");
+                JSONObject driversObject = standingsList.getJSONObject(0);
+                JSONArray driversArray = driversObject.getJSONArray("DriverStandings");
+
+                JsonParser parser = new JsonParser();
+                GsonBuilder builder = new GsonBuilder();
+                Gson gson = builder.create();
+                for (int i = 0; i < driversArray.length(); i++) {
+                    JSONObject driverAndConstructor = driversArray.getJSONObject(i);
+                    // String seasonWins = driverAndConstructor.getString("wins");
+                    // String seasonPoints = driverAndConstructor.getString("points");
+                    JSONObject driver = driverAndConstructor.getJSONObject("Driver");
+                    JsonElement driverElement = parser.parse(driver.toString());
+                    Driver driverClassed = gson.fromJson(driverElement, Driver.class);
+                    // driverClassed.setSeasonPoints(seasonPoints);
+                    // driverClassed.setSeasonWins(seasonWins);
+                    JSONArray constructors = driverAndConstructor.getJSONArray("Constructors");
+                    List<Constructor> constructorList = new ArrayList<>();
+                    for (int j = 0; j < constructors.length(); j++) {
+                        JSONObject constructorFromArray = constructors.getJSONObject(j);
+                        JsonElement constructorElement = parser.parse(constructorFromArray.toString());
+                        Constructor constructor = gson.fromJson(constructorElement
+                                , Constructor.class);
+                        constructorList.add(constructor);
+                    }
+                    Constructor[] constructorsArray = new Constructor[constructorList.size()];
+                    constructorList.toArray(constructorsArray);
+                    driverClassed.setConstructors(constructorsArray);
+                    driverArrayList.add(driverClassed);
+                }
+                driverList.addAll(driverArrayList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    private String readExternalStorage(){
+        StringBuilder sb = new StringBuilder();
+
+        if (isExternalStorageReadable()){
+            try {
+                Environment.getExternalStorageDirectory();
+                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+                FileInputStream fis = new FileInputStream(file);
+                if(fis != null){
+                    InputStreamReader isr = new InputStreamReader(fis);
+                    BufferedReader br = new BufferedReader(isr);
+
+                    String line = null;
+                    while((line = br.readLine()) != null){
+
+                        sb.append(line + "\n");
+
+                    }
+                    fis.close();
+                }
+                System.out.println(sb);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return String.valueOf(sb);
+    }
+
+    private boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+            return true;
+        }
+        return false;
+    }
+    private boolean isExternalStorageWritable(){
+        if(Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())){
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+
+
 }

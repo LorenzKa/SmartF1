@@ -41,6 +41,18 @@
         android:textSize="17dp" />
 
     <TextView
+        android:id="@+id/facts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/rounded_corner"
+        android:fontFamily="@font/driverconstructor"
+        android:padding="5sp"
+        android:text="TextView"
+        android:textColor="@color/colorFont"
+        android:textSize="17dp" />
+
+    <TextView
         android:id="@+id/sport"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
