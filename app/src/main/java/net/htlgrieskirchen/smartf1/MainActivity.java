@@ -2,10 +2,13 @@ package net.htlgrieskirchen.smartf1;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +49,19 @@ public class MainActivity extends AppCompatActivity {
         currentChampionship.setAdapter(adapter);
         adapter.notifyDataSetChanged();
         System.out.println(driverList);
+
+        currentChampionship.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String driver = driverList.get(position).toString();
+                String result = Arrays.toString(driverList.get(position).getConstructors());
+                String constructor = result.replaceAll("\\[|\\]","");
+                Intent intent = new Intent(MainActivity.this, DetailDriver.class);
+                intent.putExtra("driver", driver);
+                intent.putExtra("constructor", constructor);
+                startActivity(intent);
+            }
+        });
 
     }
     @Override

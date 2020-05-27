@@ -8,8 +8,6 @@
     android:background="@color/colorGrey"
     tools:context=".MainActivity">
 
-
-
    <ListView
        android:id="@+id/listview_championship"
        android:background="@color/colorWhite"

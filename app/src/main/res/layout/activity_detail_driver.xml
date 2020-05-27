@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorGrey"
+    android:orientation="vertical"
+    tools:context=".DetailDriver">
+
+    <TextView
+        android:id="@+id/driver"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/rounded_corner"
+        android:fontFamily="@font/drivernumb"
+        android:padding="5sp"
+        android:text="TextView"
+        android:textColor="@color/colorFont"
+        android:textSize="17dp" />
+
+
+    <TextView
+        android:id="@+id/biography"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:backgroundTint="@color/colorWhite"
+        android:background="@drawable/rounded_corner"
+        android:fontFamily="@font/driverconstructor"
+        android:padding="5sp"
+        android:text="TextView"
+        android:textColor="@color/colorFont"
+        android:textSize="17dp" />
+
+    <TextView
+        android:id="@+id/sport"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@drawable/rounded_corner"
+        android:fontFamily="@font/driverconstructor"
+        android:padding="5sp"
+        android:text="TextView"
+        android:textColor="@color/colorFont"
+        android:textSize="17dp" />
+</LinearLayout>

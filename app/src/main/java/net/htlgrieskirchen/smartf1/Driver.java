@@ -1,8 +1,15 @@
 package net.htlgrieskirchen.smartf1;
 
+import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Date;
 
-public class Driver {
+public class Driver  {
     private String driverid;
     private String permanentNumber;
     private String code;
@@ -10,22 +17,43 @@ public class Driver {
     private String givenName;
     private String familyName;
     private String dateOfBirth;
+    private String age;
     private String nationality;
     private Constructor[] constructors;
 
+
+    public String format(){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        try {
+            Date date = sdf.parse(dateOfBirth);
+            dateOfBirth = sdf.format(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return dateOfBirth;
+    }
+
+    public String Calcage(){
+        int age = 0;
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
+            Date birth = sdf.parse(dateOfBirth);
+            Date d = new Date();
+
+            LocalDate birthday = birth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            LocalDate now = d.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+             age = Period.between(birthday, now).getYears();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return String.valueOf(age);
+    }
+
     @Override
     public String toString() {
-        return "Driver{" +
-                "driverid='" + driverid + '\'' +
-                ", permanentNumber='" + permanentNumber + '\'' +
-                ", code='" + code + '\'' +
-                ", url='" + url + '\'' +
-                ", givenName='" + givenName + '\'' +
-                ", familyName='" + familyName + '\'' +
-                ", dateOfBirth='" + dateOfBirth + '\'' +
-                ", nationality='" + nationality + '\'' +
-                ", constructors=" + Arrays.toString(constructors) +
-                '}';
+        return driverid+","+permanentNumber+","+code+","+url+","+givenName+","+familyName+","+dateOfBirth+","+nationality+","+constructors.toString();
     }
 
     public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, Constructor[] constructors) {
@@ -37,7 +65,6 @@ public class Driver {
         this.familyName = familyName;
         this.dateOfBirth = dateOfBirth;
         this.nationality = nationality;
-
         this.constructors = constructors;
     }
 
