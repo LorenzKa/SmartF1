@@ -55,10 +55,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         driverList = new ArrayList<>();
         System.out.println(driverList);
-        if (Connection()){
+        if (Connection() == true){
             ServerTask st = new ServerTask("2019", true);
             st.execute();
-        }{
+        }else{
           load();
         }
         currentChampionship = (ListView) findViewById(R.id.listview_championship);
@@ -247,9 +247,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
         String response = readExternalStorage();
         driverList = new ArrayList<>();
         try {
-           // JSONArray jsonarray = new JSONArray(response);
-
-            //if (jsonarray.length() > 0) {
                 JSONObject jsonObject = new JSONObject(response);
                 JSONObject mrdata = jsonObject.getJSONObject("MRData");
                 JSONObject standingstable = mrdata.getJSONObject("StandingsTable");

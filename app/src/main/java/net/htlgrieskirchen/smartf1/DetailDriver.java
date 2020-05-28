@@ -68,13 +68,16 @@ public class DetailDriver extends AppCompatActivity {
         tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+arrayList.get(0).getCode()+"\nNummer: "+arrayList.get(0).getPermanentNumber());
         tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
 
-        ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
-        st.execute();
-        while (url==null){
-            System.out.println("waiting");
+        if (Connection()) {
+            ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
+            st.execute();
+            while (url == null) {
+                System.out.println("waiting");
+            }
+            Picasso.with(DetailDriver.this).load(url).into(imageView);
+        }else{
+            Toast.makeText(DetailDriver.this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen!", Toast.LENGTH_LONG).show();
         }
-        Picasso.with(DetailDriver.this).load(url).into(imageView);
-
     }
     private String calcAge(){
         int age = 0;
@@ -87,7 +90,6 @@ public class DetailDriver extends AppCompatActivity {
             } catch (ParseException e) {
                 e.printStackTrace();
             }
-
             Date birth = ourFormat.parse(reformattedStr);
             Date d = new Date();
 
@@ -159,9 +161,27 @@ public class DetailDriver extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 return sJsonResponse;
-
             }
         }
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
+    }
     }
 
 
