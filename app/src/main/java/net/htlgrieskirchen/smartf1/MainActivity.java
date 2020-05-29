@@ -1,15 +1,18 @@
 package net.htlgrieskirchen.smartf1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -80,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         Msettings = menu.findItem(R.id.settings);
         return super.onCreateOptionsMenu(menu);
     }
-public class ServerTask extends AsyncTask<String, Integer, String> {
+    public class ServerTask extends AsyncTask<String, Integer, String> {
     private final String baseURL = "http://ergast.com/api/f1/";
     private String year;
     private boolean driverStandings;
@@ -111,6 +115,7 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
         adapter.notifyDataSetChanged();
         wirteFile();
     }
+
 
     @Override
     protected void onProgressUpdate(Integer... values) {
@@ -314,7 +319,6 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
         }
         return String.valueOf(sb);
     }
-
     private boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         if (Environment.MEDIA_MOUNTED.equals(state) ||
@@ -331,7 +335,4 @@ public class ServerTask extends AsyncTask<String, Integer, String> {
             return false;
         }
     }
-
-
-
 }

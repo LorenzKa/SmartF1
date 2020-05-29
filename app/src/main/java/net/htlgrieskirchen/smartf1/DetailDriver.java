@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -53,6 +54,7 @@ public class DetailDriver extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_driver);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         TextView tvName = findViewById(R.id.driver);
         TextView tvBiography = findViewById(R.id.biography);
         TextView tvFacts = findViewById(R.id.facts);
@@ -181,6 +183,11 @@ public class DetailDriver extends AppCompatActivity {
                 }
         }
         return Wifi || Mobile;
+    }
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(this, MainActivity.class);
+        startActivity(myIntent);
+        return true;
     }
     }
 
