@@ -6,6 +6,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ListView;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
 
@@ -13,11 +17,20 @@ public class TrackActivity extends AppCompatActivity {
     private MenuItem Mpast_championships;
     private MenuItem MTracks;
     private MenuItem Msettings;
+    private List<Track> trackList;
+    private ListView listView;
+    private TrackAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
+        trackList = new ArrayList<>();
+        listView = findViewById(R.id.listview_track);
+        TrackLocation[] trackLocations = {new TrackLocation("29.09", "4.5678989", "Shakir", "Bahrain")};
+        trackList.add(new Track("bahr", "fd", "BahrainGP", trackLocations));
+        adapter = new TrackAdapter(this, R.layout.track, trackList);
+        listView.setAdapter(adapter);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

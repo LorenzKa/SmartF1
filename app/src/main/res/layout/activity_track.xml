@@ -9,7 +9,7 @@
     tools:context=".TrackActivity">
 
     <ListView
-        android:id="@+id/listview_championship"
+        android:id="@+id/listview_track"
         android:background="@color/colorWhite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -16,12 +16,7 @@ public class TrackLocation {
 
     @Override
     public String toString() {
-        return "TrackLocation{" +
-                "longitude='" + longitude + '\'' +
-                ", latiude='" + latiude + '\'' +
-                ", locality='" + locality + '\'' +
-                ", country='" + country + '\'' +
-                '}';
+        return longitude+","+latiude+","+locality+","+country;
     }
 
     public String getLatiude() {

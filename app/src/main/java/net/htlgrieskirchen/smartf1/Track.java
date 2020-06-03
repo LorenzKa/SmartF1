@@ -31,19 +31,19 @@ public class Track {
         return url;
     }
 
-    public Track(String circuitId, String url, String circuitName, TrackLocation[] trackLocations) {
-        this.circuitId = circuitId;
-        this.url = url;
-        this.circuitName = circuitName;
-        this.trackLocations = trackLocations;
-    }
-
     public void setUrl(String url) {
         this.url = url;
     }
 
     public String getCircuitName() {
         return circuitName;
+    }
+
+    public Track(String circuitId, String url, String circuitName, TrackLocation[] trackLocations) {
+        this.circuitId = circuitId;
+        this.url = url;
+        this.circuitName = circuitName;
+        this.trackLocations = trackLocations;
     }
 
     public void setCircuitName(String circuitName) {

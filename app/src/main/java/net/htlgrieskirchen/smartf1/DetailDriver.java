@@ -46,7 +46,6 @@ public class DetailDriver extends AppCompatActivity {
     private ArrayList<Driver> arrayList = new ArrayList<>();
     private String driver;
     private String constructor;
-    private String pictureURL;
     ImageView imageView;
     private String url;
 
