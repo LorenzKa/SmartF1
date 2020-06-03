@@ -11,7 +11,7 @@
         />
     <item
         android:id="@+id/race_calendar"
-        android:title="@string/race_calendar"
+        android:title="@string/race_tracks"
         />
     <item
         android:id="@+id/settings"

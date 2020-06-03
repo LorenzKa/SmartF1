@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private MenuItem Mcurrent_championships;
     private MenuItem Mpast_championships;
-    private MenuItem Mrace_calendar;
+    private MenuItem MTracks;
     private MenuItem Msettings;
     private ListView currentChampionship;
     private Adapter adapter;
@@ -88,8 +88,30 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         Mcurrent_championships = menu.findItem(R.id.current_championship);
+        Mcurrent_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
         Mpast_championships = menu.findItem(R.id.past_championship);
-        Mrace_calendar = menu.findItem(R.id.race_calendar);
+        Mpast_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                return false;
+            }
+        });
+        MTracks = menu.findItem(R.id.race_calendar);
+        MTracks.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MainActivity.this, TrackActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
         Msettings = menu.findItem(R.id.settings);
         return super.onCreateOptionsMenu(menu);
     }
