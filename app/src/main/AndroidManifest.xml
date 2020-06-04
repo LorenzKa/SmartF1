@@ -10,11 +10,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+
         android:usesCleartextTraffic="true">
         <activity android:name=".DetailTrack" />
         <activity android:name=".TrackActivity" />
         <activity android:name=".DetailDriver" />
         <activity android:name=".Preference.PreferenceActivity" />
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

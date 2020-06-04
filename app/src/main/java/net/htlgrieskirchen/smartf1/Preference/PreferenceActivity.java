@@ -13,5 +13,6 @@ public class PreferenceActivity extends AppCompatActivity {
                 .replace(android.R.id.content, new
                         PreferenceFragment())
                 .commit();
+
     }
 }

@@ -126,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, TrackActivity.class);
                 startActivity(intent);
                 return false;
+
             }
         });
         Msettings = menu.findItem(R.id.settings);
