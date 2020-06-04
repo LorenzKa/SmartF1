@@ -1,8 +1,11 @@
 package net.htlgrieskirchen.smartf1;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,6 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -49,7 +53,7 @@ public class TrackActivity extends AppCompatActivity {
     private String jsonResponse;
     private int size;
     private static final String FILE_NAME = "tracks.json";
-    private File file;
+    private File textFile;
     private String response;
 
     @Override
@@ -59,20 +63,24 @@ public class TrackActivity extends AppCompatActivity {
         trackList = new ArrayList<>();
         listView = findViewById(R.id.listview_track);
 
-        file = new File(Environment.getExternalStorageDirectory().toString() + "/tracks.json");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+
+        if (checkPermission()) {
+            if (textFile.exists()) {
+                load();
+            } else {
+                for (int i = 1; i < 22; i++) {
+                    ServerTask s = new ServerTask(String.valueOf(i));
+                    s.execute();
+                }
             }
-            for (int i = 1; i < 22; i++) {
-                ServerTask s = new ServerTask(String.valueOf(i));
-                s.execute();
+        }else{
+                for (int i = 1; i < 22; i++) {
+                    ServerTask s = new ServerTask(String.valueOf(i));
+                    s.execute();
+                }
             }
-        } else {
-            load();
-        }
+
         adapter = new TrackAdapter(this, R.layout.track, trackList);
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -141,10 +149,7 @@ public class TrackActivity extends AppCompatActivity {
             super.onPostExecute(s);
             adapter.notifyDataSetChanged();
             writeFile(trackList);
-
         }
-
-
         @Override
         protected void onProgressUpdate(Integer... values) {
             super.onProgressUpdate(values);
@@ -219,21 +224,19 @@ public class TrackActivity extends AppCompatActivity {
 
     private void writeFile(List<Track> trackArrayList) {
         if (isExternalStorageWritable()) {
-            File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
             try {
-
+                textFile.createNewFile();
                 String json = new Gson().toJson(trackArrayList);
                 FileOutputStream output = new FileOutputStream(textFile);
                 output.write(json.getBytes());
                 output.close();
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
 
         }
     }
-
     private String readExternalStorage() {
         StringBuilder sb = new StringBuilder();
         if (isExternalStorageReadable()) {
@@ -243,12 +246,9 @@ public class TrackActivity extends AppCompatActivity {
                 FileInputStream fis = new FileInputStream(file);
                 InputStreamReader isr = new InputStreamReader(fis);
                 BufferedReader br = new BufferedReader(isr);
-
                 String line;
                 while ((line = br.readLine()) != null) {
-
                     sb.append(line + "\n");
-
                 }
                 fis.close();
                 System.out.println(sb);
@@ -279,6 +279,15 @@ public class TrackActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
-
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(TrackActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
+        }
     }
+
+
+}
 

@@ -59,7 +59,7 @@ public class DetailTrack extends AppCompatActivity {
 
 
         }else{
-            Toast.makeText(DetailTrack.this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen!", Toast.LENGTH_LONG).show();
+            Toast.makeText(DetailTrack.this, "Stellen Sie eine Internetverbindung her um das Streckenbild zu sehen!", Toast.LENGTH_LONG).show();
         }split = trackLocation.split(",");
         tvCircuitLocality.setText("Ort: "+split[2]+"\nLand: "+split[3]);
         latlong.setText("Longitude: "+split[0]+"\nLatiude: "+split[1]);
@@ -98,19 +98,15 @@ public class DetailTrack extends AppCompatActivity {
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
-
                 }
-
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
             return sJsonResponse;
         }
-
         @Override
         protected void onPostExecute(String s) {
             imageView = findViewById(R.id.imageView);
-
             if (url != null) {
                 imageView.setBackgroundColor(Color.WHITE);
                 Picasso.with(DetailTrack.this).load(url).into(imageView);
