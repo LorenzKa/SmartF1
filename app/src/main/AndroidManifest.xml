@@ -14,6 +14,7 @@
         <activity android:name=".DetailTrack" />
         <activity android:name=".TrackActivity" />
         <activity android:name=".DetailDriver" />
+        <activity android:name=".Preference.PreferenceActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
