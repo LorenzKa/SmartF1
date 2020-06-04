@@ -6,8 +6,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 
 public class TrackAdapter extends BaseAdapter {
@@ -41,13 +39,8 @@ public class TrackAdapter extends BaseAdapter {
         }
         TextView tvCountry = listItemView.findViewById(R.id.circuitCountry);
         TextView tvName = listItemView.findViewById(R.id.circuitName);
-
         tvName.setText(track.get(position).getCircuitName());
-        String s = Arrays.toString(track.get(position).getTrackLocations());
-        String rep = s.replaceAll("\\[|\\]","");
-        String[] split = rep.split(",");
-        String result = split[2] +", "+split[3];
-        tvCountry.setText(result);
+        tvCountry.setText(track.get(position).getLocation().getCountry());
         return listItemView;
     }
 }

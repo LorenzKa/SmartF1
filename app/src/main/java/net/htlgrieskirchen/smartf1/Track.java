@@ -1,13 +1,11 @@
 package net.htlgrieskirchen.smartf1;
 
-import java.util.Arrays;
-
 public class Track {
 
     private String circuitId;
     private String url;
     private String circuitName;
-    private TrackLocation[] trackLocations;
+    private TrackLocation Location;
 
     public String getCircuitId() {
         return circuitId;
@@ -19,7 +17,7 @@ public class Track {
                 "circuitId='" + circuitId + '\'' +
                 ", url='" + url + '\'' +
                 ", circuitName='" + circuitName + '\'' +
-                ", trackLocations=" + Arrays.toString(trackLocations) +
+                ", trackLocations=" + Location +
                 '}';
     }
 
@@ -39,22 +37,22 @@ public class Track {
         return circuitName;
     }
 
-    public Track(String circuitId, String url, String circuitName, TrackLocation[] trackLocations) {
+    public Track(String circuitId, String url, String circuitName, TrackLocation Location) {
         this.circuitId = circuitId;
         this.url = url;
         this.circuitName = circuitName;
-        this.trackLocations = trackLocations;
+        this.Location = Location;
     }
 
     public void setCircuitName(String circuitName) {
         this.circuitName = circuitName;
     }
 
-    public TrackLocation[] getTrackLocations() {
-        return trackLocations;
+    public TrackLocation getLocation() {
+        return Location;
     }
 
-    public void setTrackLocations(TrackLocation[] trackLocations) {
-        this.trackLocations = trackLocations;
+    public void setLocation(TrackLocation location) {
+        this.Location = location;
     }
 }

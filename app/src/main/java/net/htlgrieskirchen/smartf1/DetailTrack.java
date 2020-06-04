@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-public class DeatailTrack extends AppCompatActivity {
+public class DetailTrack extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

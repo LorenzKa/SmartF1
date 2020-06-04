@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".DeatailTrack"></activity>
+        <activity android:name=".DetailTrack" />
         <activity android:name=".TrackActivity" />
         <activity android:name=".DetailDriver" />
         <activity android:name=".MainActivity">
