@@ -58,22 +58,24 @@ public class TrackActivity extends AppCompatActivity {
         setContentView(R.layout.activity_track);
         trackList = new ArrayList<>();
         listView = findViewById(R.id.listview_track);
+
+        file = new File(Environment.getExternalStorageDirectory().toString() + "/tracks.json");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            for (int i = 1; i < 22; i++) {
+                ServerTask s = new ServerTask(String.valueOf(i));
+                s.execute();
+            }
+        } else {
+            load();
+        }
         adapter = new TrackAdapter(this, R.layout.track, trackList);
         listView.setAdapter(adapter);
-        file = new File(Environment.getExternalStorageDirectory().toString()+"/tracks.json");
-      if (!file.exists()) {
-          try {
-              file.createNewFile();
-          } catch (IOException e) {
-              e.printStackTrace();
-          }
-          for (int i = 1; i < 22; i++) {
-              ServerTask s = new ServerTask(String.valueOf(i));
-              s.execute();
-          }
-      }else{
-           load();
-       }
+        adapter.notifyDataSetChanged();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -83,6 +85,7 @@ public class TrackActivity extends AppCompatActivity {
             }
         });
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -120,6 +123,7 @@ public class TrackActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
+
     public class ServerTask extends AsyncTask<String, Integer, String> {
         private String number;
 
@@ -148,69 +152,73 @@ public class TrackActivity extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... strings) {
-                List<Track> privateTrackList = new ArrayList<>();
-                try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/2019/"+number+"/circuits.json").openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            stringBuilder.append(line);
-                        }
-                        jsonResponse = stringBuilder.toString();
-                        JSONObject jsonObject = new JSONObject(jsonResponse);
-                        JSONObject mrdata = jsonObject.getJSONObject("MRData");
-                        JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
-                        JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");
-                        size = circuitsArray.length();
-                        JsonParser parser = new JsonParser();
-                        GsonBuilder builder = new GsonBuilder();
-                        Gson gson = builder.create();
-                        for (int i = 0; i < circuitsArray.length(); i++) {
-                            JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
-                            JsonElement driverElement = parser.parse(driverAndConstructor.toString());
-                            Track trackClassed = gson.fromJson(driverElement, Track.class);
-                            JSONObject location = driverAndConstructor.getJSONObject("Location");
-                            String latitude = location.getString("lat");
-                            String longitude = location.getString("long");
-                            String locality = location.getString("locality");
-                            String country = location.getString("country");
-                            TrackLocation location1 = new TrackLocation(latitude, longitude, locality, country);
-                            trackClassed.setLocation(location1);
-                            privateTrackList.add(trackClassed);
-                        }
-                     //   trackList = new ArrayList<>();
-                        trackList.addAll(privateTrackList);
-                        return jsonResponse;
-                    } else {
-                        return "ErrorCodeFromAPI";
+            List<Track> privateTrackList = new ArrayList<>();
+            try {
+                HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/2019/" + number + "/circuits.json").openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Content-Type", "application/json");
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
                     }
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
+                    jsonResponse = stringBuilder.toString();
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+                    JSONObject mrdata = jsonObject.getJSONObject("MRData");
+                    JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
+                    JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");
+                    size = circuitsArray.length();
+                    JsonParser parser = new JsonParser();
+                    GsonBuilder builder = new GsonBuilder();
+                    Gson gson = builder.create();
+                    for (int i = 0; i < circuitsArray.length(); i++) {
+                        JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
+                        JsonElement driverElement = parser.parse(driverAndConstructor.toString());
+                        Track trackClassed = gson.fromJson(driverElement, Track.class);
+                        JSONObject location = driverAndConstructor.getJSONObject("Location");
+                        String latitude = location.getString("lat");
+                        String longitude = location.getString("long");
+                        String locality = location.getString("locality");
+                        String country = location.getString("country");
+                        TrackLocation location1 = new TrackLocation(latitude, longitude, locality, country);
+                        trackClassed.setLocation(location1);
+                        privateTrackList.add(trackClassed);
+                    }
+                    //   trackList = new ArrayList<>();
+                    trackList.addAll(privateTrackList);
+                    return jsonResponse;
+                } else {
+                    return "ErrorCodeFromAPI";
                 }
-                return jsonResponse;
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
             }
+            return jsonResponse;
+        }
     }
-    private void setUpIntent(){
+
+    private void setUpIntent() {
         Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
         intent.putExtra("track", trackListAsString);
         intent.putExtra("location", location);
         startActivity(intent);
     }
+
     private boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
         return Environment.MEDIA_MOUNTED.equals(state) ||
                 Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
     }
-    private boolean isExternalStorageWritable(){
+
+    private boolean isExternalStorageWritable() {
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
-    private void writeFile(List<Track> trackArrayList){
-        if(isExternalStorageWritable()){
+
+    private void writeFile(List<Track> trackArrayList) {
+        if (isExternalStorageWritable()) {
             File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
             try {
 
@@ -225,10 +233,10 @@ public class TrackActivity extends AppCompatActivity {
 
         }
     }
-    private String readExternalStorage(){
-        StringBuilder sb = new StringBuilder();
 
-        if (isExternalStorageReadable()){
+    private String readExternalStorage() {
+        StringBuilder sb = new StringBuilder();
+        if (isExternalStorageReadable()) {
             try {
                 Environment.getExternalStorageDirectory();
                 File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
@@ -237,7 +245,7 @@ public class TrackActivity extends AppCompatActivity {
                 BufferedReader br = new BufferedReader(isr);
 
                 String line;
-                while((line = br.readLine()) != null){
+                while ((line = br.readLine()) != null) {
 
                     sb.append(line + "\n");
 
@@ -250,35 +258,27 @@ public class TrackActivity extends AppCompatActivity {
         }
         return String.valueOf(sb);
     }
-    private void load(){
+
+    private void load() {
         try {
             List<Track> privateTrackList = new ArrayList<>();
             response = readExternalStorage();
             trackList = new ArrayList<>();
-            JSONObject jsonObject = new JSONObject(response);
-            JSONObject mrdata = jsonObject.getJSONObject("MRData");
-            JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
-            JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");
+            JSONArray jsonArray = new JSONArray(response);
             JsonParser parser = new JsonParser();
             GsonBuilder builder = new GsonBuilder();
             Gson gson = builder.create();
-            for (int i = 0; i < circuitsArray.length(); i++) {
-                JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
-                JsonElement driverElement = parser.parse(driverAndConstructor.toString());
-                Track trackClassed = gson.fromJson(driverElement, Track.class);
-                JSONObject location = driverAndConstructor.getJSONObject("Location");
-                String latitude = location.getString("lat");
-                String longitude = location.getString("long");
-                String locality = location.getString("locality");
-                String country = location.getString("country");
-                TrackLocation location1 = new TrackLocation(latitude, longitude, locality, country);
-                trackClassed.setLocation(location1);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject trackAndLocation = jsonArray.getJSONObject(i);
+                JsonElement jsonElement = parser.parse(trackAndLocation.toString());
+                Track trackClassed = gson.fromJson(jsonElement, Track.class);
                 privateTrackList.add(trackClassed);
             }
             trackList.addAll(privateTrackList);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        }
+    }
+
     }
 
