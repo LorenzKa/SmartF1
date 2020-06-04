@@ -4,12 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/rounded_corner"
-
+    android:orientation="vertical"
     >
-    <TableRow
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -20,21 +17,14 @@
             android:text="Test"
             android:textSize="20dp"/>
 
-    </TableRow>
-   <TableRow
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content"
-       android:layout_weight="1">
        <TextView
            android:id="@+id/circuitCountry"
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:text="Test"
            android:padding="10dp"
-           android:gravity="right"
            android:textColor="@color/colorFont"
            android:fontFamily="@font/driverconstructor"
            android:textSize="18dp"
            />
-   </TableRow>
 </LinearLayout>

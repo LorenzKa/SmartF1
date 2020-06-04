@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,6 +23,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -39,8 +43,12 @@ public class TrackActivity extends AppCompatActivity {
     private List<Track> trackList;
     private ListView listView;
     private TrackAdapter adapter;
-    String location;
-     String trackListAsString;
+    private String location;
+    private String trackListAsString;
+    private String jsonResponse;
+    private int size;
+    private static final String FILE_NAME = "tracks.json";
+    private File file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +58,16 @@ public class TrackActivity extends AppCompatActivity {
         listView = findViewById(R.id.listview_track);
         adapter = new TrackAdapter(this, R.layout.track, trackList);
         listView.setAdapter(adapter);
-        ServerTask st = new ServerTask("2019");
-        st.execute();
+        file = new File(Environment.getExternalStorageDirectory().toString()+"/tracks.json");
+       if (!file.exists()) {
+            for (int i = 1; i < 22; i++) {
+                ServerTask s = new ServerTask(String.valueOf(i));
+                s.execute();
+            }
+        }else{
+            System.out.println("TEST123");
+           load();
+       }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -99,13 +115,10 @@ public class TrackActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
-        private final String baseURL = "http://ergast.com/api/f1/";
-        private String year;
-        private boolean driverStandings;
-        private String jsonResponse;
+        private String number;
 
-        public ServerTask(String year) {
-            this.year = year;
+        public ServerTask(String number) {
+            this.number = number;
         }
 
         @Override
@@ -117,7 +130,7 @@ public class TrackActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             adapter.notifyDataSetChanged();
-            //writeFile();
+            writeFile();
         }
 
 
@@ -130,7 +143,7 @@ public class TrackActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
                 List<Track> privateTrackList = new ArrayList<>();
                 try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(baseURL + year + "/" + "circuits" + ".json").openConnection();
+                    HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/2019/"+number+"/circuits.json").openConnection();
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("Content-Type", "application/json");
                     int responseCode = connection.getResponseCode();
@@ -146,6 +159,7 @@ public class TrackActivity extends AppCompatActivity {
                         JSONObject mrdata = jsonObject.getJSONObject("MRData");
                         JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
                         JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");
+                        size = circuitsArray.length();
                         JsonParser parser = new JsonParser();
                         GsonBuilder builder = new GsonBuilder();
                         Gson gson = builder.create();
@@ -153,6 +167,13 @@ public class TrackActivity extends AppCompatActivity {
                             JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
                             JsonElement driverElement = parser.parse(driverAndConstructor.toString());
                             Track trackClassed = gson.fromJson(driverElement, Track.class);
+                            JSONObject location = driverAndConstructor.getJSONObject("Location");
+                            String latitude = location.getString("lat");
+                            String longitude = location.getString("long");
+                            String locality = location.getString("locality");
+                            String country = location.getString("country");
+                            TrackLocation location1 = new TrackLocation(latitude, longitude, locality, country);
+                            trackClassed.setLocation(location1);
                             privateTrackList.add(trackClassed);
                         }
                         trackList.addAll(privateTrackList);
@@ -172,4 +193,83 @@ public class TrackActivity extends AppCompatActivity {
         intent.putExtra("location", location);
         startActivity(intent);
     }
-}
+    private boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+    private boolean isExternalStorageWritable(){
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    }
+    private void writeFile(){
+        if(isExternalStorageWritable()){
+            File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+            try {
+                FileOutputStream output = new FileOutputStream(textFile);
+                output.write(jsonResponse.getBytes());
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private String readExternalStorage(){
+        StringBuilder sb = new StringBuilder();
+
+        if (isExternalStorageReadable()){
+            try {
+                Environment.getExternalStorageDirectory();
+                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+                FileInputStream fis = new FileInputStream(file);
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+
+                String line;
+                while((line = br.readLine()) != null){
+
+                    sb.append(line + "\n");
+
+                }
+                fis.close();
+                System.out.println(sb);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return String.valueOf(sb);
+    }
+    private void load(){
+        List<Track> privateTrackList = new ArrayList<>();
+        String response = readExternalStorage();
+        trackList = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+        response = stringBuilder.toString();
+
+        try { JSONObject jsonObject = new JSONObject(response);
+            JSONObject mrdata = jsonObject.getJSONObject("MRData");
+            JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
+            JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");
+            JsonParser parser = new JsonParser();
+            GsonBuilder builder = new GsonBuilder();
+            Gson gson = builder.create();
+            for (int i = 0; i < circuitsArray.length(); i++) {
+                JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
+                JsonElement driverElement = parser.parse(driverAndConstructor.toString());
+                Track trackClassed = gson.fromJson(driverElement, Track.class);
+                JSONObject location = driverAndConstructor.getJSONObject("Location");
+                String latitude = location.getString("lat");
+                String longitude = location.getString("long");
+                String locality = location.getString("locality");
+                String country = location.getString("country");
+                TrackLocation location1 = new TrackLocation(latitude, longitude, locality, country);
+                trackClassed.setLocation(location1);
+                privateTrackList.add(trackClassed);
+            }
+            trackList.addAll(privateTrackList);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        }
+    }
+
