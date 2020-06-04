@@ -2,11 +2,8 @@ package net.htlgrieskirchen.smartf1;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,12 +12,13 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -39,6 +37,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private Adapter adapter;
     private ArrayList<Driver> driverList;
     private static final String FILE_NAME = "drivers.json";
-    private File file;
+    private File textFile;
     private String jsonResponse;
     ArrayList<Driver> driverArrayList = new ArrayList<>();
 
@@ -62,24 +61,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
         driverList = new ArrayList<>();
-        file = new File(Environment.getExternalStorageDirectory().toString()+"/drivers.json");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            ServerTask st = new ServerTask("2019", true);
-            st.execute();
-        }else{
-            load();
-        }
-
-
         currentChampionship = findViewById(R.id.listview_championship);
+
+        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+
+            if (checkPermission()) {
+                if (textFile.exists()) {
+                    load();
+                    System.out.println(driverList);
+                    if (driverList.isEmpty()){
+                        ServerTask serverTask = new ServerTask("2019", true);
+                        serverTask.execute();
+                    }
+                }else{
+                    ServerTask serverTask = new ServerTask("2019", true);
+                    serverTask.execute();
+                }
+            } else {
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
+                ServerTask serverTask = new ServerTask("2019", true);
+                serverTask.execute();
+            }
+
         adapter = new Adapter(this, R.layout.item, driverList);
         currentChampionship.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -97,9 +103,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
@@ -126,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, TrackActivity.class);
                 startActivity(intent);
                 return false;
-
             }
         });
         Msettings = menu.findItem(R.id.settings);
@@ -136,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                 startActivityForResult(intent, 1);
                 return false;
+
             }
         });
         return super.onCreateOptionsMenu(menu);
@@ -160,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(s);
             currentChampionship.setAdapter(adapter);
             adapter.notifyDataSetChanged();
-            wirteFile();
+         //   writeFile();
         }
 
 
@@ -226,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         driverList.addAll(driverArrayList);
+                        writeFile(jsonResponse);
                         return jsonResponse;
                     } else {
                         return "ErrorCodeFromAPI";
@@ -260,12 +264,13 @@ public class MainActivity extends AppCompatActivity {
         }
         return Wifi || Mobile;
     }
-    private void wirteFile(){
+    private void writeFile(String response){
         if(isExternalStorageWritable()){
-            File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
             try {
+                textFile.createNewFile();
                 FileOutputStream output = new FileOutputStream(textFile);
-                output.write(jsonResponse.getBytes());
+                output.write(response.getBytes());
                 output.close();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -348,4 +353,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean isExternalStorageWritable(){
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
