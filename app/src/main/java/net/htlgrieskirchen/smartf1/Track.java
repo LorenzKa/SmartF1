@@ -13,12 +13,7 @@ public class Track {
 
     @Override
     public String toString() {
-        return "Track{" +
-                "circuitId='" + circuitId + '\'' +
-                ", url='" + url + '\'' +
-                ", circuitName='" + circuitName + '\'' +
-                ", trackLocations=" + Location +
-                '}';
+        return circuitId+","+url+","+circuitName+","+Location;
     }
 
     public void setCircuitId(String circuitId) {

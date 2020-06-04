@@ -6,13 +6,12 @@
     android:background="@drawable/rounded_corner"
 
     >
-
     <TableRow
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1">
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/circuitName"
             android:textColor="@color/colorFont"
@@ -20,8 +19,6 @@
             android:fontFamily="@font/drivernumb"
             android:text="Test"
             android:textSize="20dp"/>
-
-
 
     </TableRow>
    <TableRow
@@ -37,10 +34,7 @@
            android:gravity="right"
            android:textColor="@color/colorFont"
            android:fontFamily="@font/driverconstructor"
-           android:textSize="20dp"
+           android:textSize="18dp"
            />
    </TableRow>
-
-
-
 </LinearLayout>

@@ -7,6 +7,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
@@ -25,6 +27,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
@@ -36,6 +39,8 @@ public class TrackActivity extends AppCompatActivity {
     private List<Track> trackList;
     private ListView listView;
     private TrackAdapter adapter;
+    String location;
+     String trackListAsString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +52,14 @@ public class TrackActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         ServerTask st = new ServerTask("2019");
         st.execute();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                trackListAsString = trackList.get(position).toString();
+                location = trackList.get(position).getLocation().toString();
+                setUpIntent();
+            }
+        });
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -152,5 +165,11 @@ public class TrackActivity extends AppCompatActivity {
                 }
                 return jsonResponse;
             }
+    }
+    private void setUpIntent(){
+        Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
+        intent.putExtra("track", trackListAsString);
+        intent.putExtra("location", location);
+        startActivity(intent);
     }
 }
