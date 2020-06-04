@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -46,34 +47,31 @@ public class DetailDriver extends AppCompatActivity {
     private ArrayList<Driver> arrayList = new ArrayList<>();
     private String driver;
     private String constructor;
-    ImageView imageView;
+    private ImageView imageView;
     private String url;
+    private TextView tvName;
+    private TextView tvBiography;
+    private TextView tvFacts;
+    private TextView tvSport;
+    private String LOG = MainActivity.class.toString();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_driver);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        TextView tvName = findViewById(R.id.driver);
-        TextView tvBiography = findViewById(R.id.biography);
-        TextView tvFacts = findViewById(R.id.facts);
-        TextView tvSport = findViewById(R.id.sport);
-        imageView = findViewById(R.id.imageView);
         Intent intent = getIntent();
         driver = intent.getStringExtra("driver");
         constructor = intent.getStringExtra("constructor");
         splitNadd();
-        System.out.println(constructor);
-        tvName.setText(arrayList.get(0).getGivenName()+" "+arrayList.get(0).getFamilyName().toUpperCase());
-        tvBiography.setText("Geburtsdatum: "+formatDate()+"\n"+"Alter: "+calcAge()+"\nNationalität: "+arrayList.get(0).getNationality());
-        tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+arrayList.get(0).getCode()+"\nNummer: "+arrayList.get(0).getPermanentNumber());
-        tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
+
+        initializeViews();
 
         if (Connection()) {
             ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
             st.execute();
             while (url == null) {
-                System.out.println("waiting");
+                Log.d(LOG, "waiting...");
             }
             Picasso.with(DetailDriver.this).load(url).into(imageView);
         }else{
@@ -188,6 +186,18 @@ public class DetailDriver extends AppCompatActivity {
         startActivity(myIntent);
         return true;
     }
+    private void initializeViews(){
+         tvName = findViewById(R.id.driver);
+         tvBiography = findViewById(R.id.biography);
+         tvFacts = findViewById(R.id.facts);
+         tvSport = findViewById(R.id.sport);
+         imageView = findViewById(R.id.imageView);
+         tvName.setText(arrayList.get(0).getGivenName()+" "+arrayList.get(0).getFamilyName().toUpperCase());
+         tvBiography.setText("Geburtsdatum: "+formatDate()+"\n"+"Alter: "+calcAge()+"\nNationalität: "+arrayList.get(0).getNationality());
+         tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+arrayList.get(0).getCode()+"\nNummer: "+arrayList.get(0).getPermanentNumber());
+         tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
     }
+
+}
 
 

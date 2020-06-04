@@ -1,13 +1,5 @@
 package net.htlgrieskirchen.smartf1;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Period;
-import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.Date;
 
 public class Driver  {
     private String driverid;
@@ -17,7 +9,6 @@ public class Driver  {
     private String givenName;
     private String familyName;
     private String dateOfBirth;
-    private String age;
     private String nationality;
     private Constructor[] constructors;
     private String seasonWins;
