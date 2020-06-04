@@ -2,6 +2,7 @@ package net.htlgrieskirchen.smartf1;
 
 
 public class Driver  {
+
     private String driverid;
     private String permanentNumber;
     private String code;

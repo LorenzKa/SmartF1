@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,6 +50,7 @@ public class TrackActivity extends AppCompatActivity {
     private int size;
     private static final String FILE_NAME = "tracks.json";
     private File file;
+    private String response;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +61,12 @@ public class TrackActivity extends AppCompatActivity {
         adapter = new TrackAdapter(this, R.layout.track, trackList);
         listView.setAdapter(adapter);
         file = new File(Environment.getExternalStorageDirectory().toString()+"/tracks.json");
-       if (!file.exists()) {
-            for (int i = 1; i < 22; i++) {
-                ServerTask s = new ServerTask(String.valueOf(i));
-                s.execute();
-            }
-        }else{
-            System.out.println("TEST123");
+      if (!file.exists()) {
+          for (int i = 1; i < 22; i++) {
+              ServerTask s = new ServerTask(String.valueOf(i));
+              s.execute();
+          }
+      }else{
            load();
        }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -130,7 +131,8 @@ public class TrackActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             adapter.notifyDataSetChanged();
-            writeFile();
+            writeFile(trackList);
+
         }
 
 
@@ -176,6 +178,7 @@ public class TrackActivity extends AppCompatActivity {
                             trackClassed.setLocation(location1);
                             privateTrackList.add(trackClassed);
                         }
+                     //   trackList = new ArrayList<>();
                         trackList.addAll(privateTrackList);
                         return jsonResponse;
                     } else {
@@ -201,13 +204,16 @@ public class TrackActivity extends AppCompatActivity {
     private boolean isExternalStorageWritable(){
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
-    private void writeFile(){
+    private void writeFile(List<Track> trackArrayList){
         if(isExternalStorageWritable()){
             File textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
             try {
+
+                String json = new Gson().toJson(trackArrayList);
                 FileOutputStream output = new FileOutputStream(textFile);
-                output.write(jsonResponse.getBytes());
+                output.write(json.getBytes());
                 output.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -240,13 +246,11 @@ public class TrackActivity extends AppCompatActivity {
         return String.valueOf(sb);
     }
     private void load(){
-        List<Track> privateTrackList = new ArrayList<>();
-        String response = readExternalStorage();
-        trackList = new ArrayList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-        response = stringBuilder.toString();
-
-        try { JSONObject jsonObject = new JSONObject(response);
+        try {
+            List<Track> privateTrackList = new ArrayList<>();
+            response = readExternalStorage();
+            trackList = new ArrayList<>();
+            JSONObject jsonObject = new JSONObject(response);
             JSONObject mrdata = jsonObject.getJSONObject("MRData");
             JSONObject circuitTable = mrdata.getJSONObject("CircuitTable");
             JSONArray circuitsArray = circuitTable.getJSONArray("Circuits");

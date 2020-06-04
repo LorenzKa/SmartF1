@@ -52,7 +52,6 @@ public class DetailTrack extends AppCompatActivity {
         split = trackName.split(",");
         String circuitName = split[2];
         tvCircuitName.setText(circuitName);
-        System.out.println(trackLocation);
 
         if (Connection()) {
             ServerTask st = new ServerTask(split[1].substring(29));

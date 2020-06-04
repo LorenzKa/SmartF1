@@ -1,6 +1,7 @@
 package net.htlgrieskirchen.smartf1;
 
 public class Constructor {
+
     private String constructorId;
     private String url;
     private String name;
