@@ -1,7 +1,9 @@
 package net.htlgrieskirchen.smartf1;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.app.Activity;
@@ -13,6 +15,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private Adapter adapter;
     private ArrayList<Driver> driverList;
     private static final String FILE_NAME = "drivers.json";
+    private File file;
     private String jsonResponse;
     ArrayList<Driver> driverArrayList = new ArrayList<>();
 
@@ -55,14 +59,25 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
+
         driverList = new ArrayList<>();
-        System.out.println(driverList);
-        if (Connection()){
+        file = new File(Environment.getExternalStorageDirectory().toString()+"/drivers.json");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             ServerTask st = new ServerTask("2019", true);
             st.execute();
         }else{
-          load();
+            load();
         }
+
+
         currentChampionship = findViewById(R.id.listview_championship);
         adapter = new Adapter(this, R.layout.item, driverList);
         currentChampionship.setAdapter(adapter);
@@ -81,6 +96,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

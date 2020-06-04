@@ -62,6 +62,11 @@ public class TrackActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
         file = new File(Environment.getExternalStorageDirectory().toString()+"/tracks.json");
       if (!file.exists()) {
+          try {
+              file.createNewFile();
+          } catch (IOException e) {
+              e.printStackTrace();
+          }
           for (int i = 1; i < 22; i++) {
               ServerTask s = new ServerTask(String.valueOf(i));
               s.execute();
