@@ -2,7 +2,7 @@ package net.htlgrieskirchen.smartf1;
 
 public class TrackLocation {
     private String longitude;
-    private String latiude;
+    private String latitude;
     private String locality;
     private String country;
 
@@ -16,15 +16,21 @@ public class TrackLocation {
 
     @Override
     public String toString() {
-        return longitude+","+latiude+","+locality+","+country;
+        return longitude+","+ latitude +","+locality+","+country;
+    }
+    public TrackLocation(String latitude, String longitude, String locality, String country) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.locality = locality;
+        this.country = country;
     }
 
-    public String getLatiude() {
-        return latiude;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setLatiude(String latiude) {
-        this.latiude = latiude;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
     public String getLocality() {
@@ -40,13 +46,6 @@ public class TrackLocation {
     }
 
     public void setCountry(String country) {
-        this.country = country;
-    }
-
-    public TrackLocation(String longitude, String latiude, String locality, String country) {
-        this.longitude = longitude;
-        this.latiude = latiude;
-        this.locality = locality;
         this.country = country;
     }
 }

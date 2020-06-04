@@ -70,10 +70,7 @@ public class DetailDriver extends AppCompatActivity {
         if (Connection()) {
             ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
             st.execute();
-            while (url == null) {
-                Log.d(LOG, "waiting...");
-            }
-            Picasso.with(DetailDriver.this).load(url).into(imageView);
+
         }else{
             Toast.makeText(DetailDriver.this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen!", Toast.LENGTH_LONG).show();
         }
@@ -161,7 +158,14 @@ public class DetailDriver extends AppCompatActivity {
                 }
                 return sJsonResponse;
             }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (url != null) {
+                Picasso.with(DetailDriver.this).load(url).into(imageView);
+            }
         }
+    }
     private boolean Connection() {
         boolean Wifi = false;
         boolean Mobile = false;
