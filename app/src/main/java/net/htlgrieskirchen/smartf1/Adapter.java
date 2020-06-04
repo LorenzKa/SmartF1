@@ -5,8 +5,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,6 +12,12 @@ public class Adapter extends BaseAdapter {
     private final int listViewItemLayoutId;
     private List<Driver> driver;
     private LayoutInflater layoutInflater;
+    private TextView tvNumber;
+    private TextView tvPosition;
+    private TextView tvDriverFirstName;
+    private TextView tvConstructor;
+    private String constructor;
+
     public Adapter(Context context, int listViewItemLayoutId, List<Driver> driver) {
         this.listViewItemLayoutId = listViewItemLayoutId;
         this.driver = driver;
@@ -39,18 +43,19 @@ public class Adapter extends BaseAdapter {
         } else {
             listItemView = givenView;
         }
-        TextView tvnumber = listItemView.findViewById(R.id.number);
-        TextView tvposition = listItemView.findViewById(R.id.position);
-        TextView tvdriverfirstname = listItemView.findViewById(R.id.drivername);
-        TextView tvconstructor = listItemView.findViewById(R.id.constructor);
+        tvNumber = listItemView.findViewById(R.id.number);
+        tvPosition = listItemView.findViewById(R.id.position);
+        tvDriverFirstName = listItemView.findViewById(R.id.drivername);
+        tvConstructor = listItemView.findViewById(R.id.constructor);
+
         Driver driver = this.driver.get(position);
-        int pos = position + 1;
-        tvposition.setText(String.valueOf(pos));
-        tvnumber.setText(driver.getPermanentNumber());
-        tvdriverfirstname.setText(driver.getGivenName()+" "+driver.getFamilyName().toUpperCase());
-        String res = Arrays.toString(driver.getConstructors());
-        String rep = res.replaceAll("\\[|\\]","");
-        tvconstructor.setText(rep);
+
+        tvPosition.setText(String.valueOf(position+1));
+        tvNumber.setText(driver.getPermanentNumber());
+        tvDriverFirstName.setText(driver.getGivenName()+" "+driver.getFamilyName().toUpperCase());
+        String result = Arrays.toString(driver.getConstructors());
+        constructor = result.replaceAll("\\[|\\]","");
+        tvConstructor.setText(constructor);
         return listItemView;
     }
 }

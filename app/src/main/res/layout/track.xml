@@ -16,10 +16,10 @@
             android:layout_height="wrap_content"
             android:id="@+id/circuitName"
             android:textColor="@color/colorFont"
-            android:padding="5sp"
-            android:fontFamily="@font/driverconstructor"
+            android:padding="10dp"
+            android:fontFamily="@font/drivernumb"
             android:text="Test"
-            android:textSize="17dp"/>
+            android:textSize="20dp"/>
 
 
 
@@ -33,11 +33,11 @@
            android:layout_width="match_parent"
            android:layout_height="wrap_content"
            android:text="Test"
-           android:padding="5sp"
+           android:padding="10dp"
            android:gravity="right"
            android:textColor="@color/colorFont"
            android:fontFamily="@font/driverconstructor"
-           android:textSize="17dp"
+           android:textSize="20dp"
            />
    </TableRow>
 

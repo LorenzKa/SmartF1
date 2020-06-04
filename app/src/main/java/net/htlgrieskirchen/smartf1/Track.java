@@ -1,7 +1,5 @@
 package net.htlgrieskirchen.smartf1;
 
-import java.util.Arrays;
-
 public class Track {
 
     private String circuitId;
@@ -15,12 +13,7 @@ public class Track {
 
     @Override
     public String toString() {
-        return "Track{" +
-                "circuitId='" + circuitId + '\'' +
-                ", url='" + url + '\'' +
-                ", circuitName='" + circuitName + '\'' +
-                ", trackLocations=" + Arrays.toString(trackLocations) +
-                '}';
+        return circuitId+","+url+","+circuitName+","+trackLocations;
     }
 
     public void setCircuitId(String circuitId) {

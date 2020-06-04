@@ -5,12 +5,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
 
 public class TrackAdapter extends BaseAdapter {
+
     private final int listViewItemLayoutId;
     private List<Track> track;
     private LayoutInflater layoutInflater;

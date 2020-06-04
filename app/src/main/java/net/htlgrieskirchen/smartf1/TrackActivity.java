@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
@@ -20,17 +23,29 @@ public class TrackActivity extends AppCompatActivity {
     private List<Track> trackList;
     private ListView listView;
     private TrackAdapter adapter;
+    private String location;
+    private String trackListAsString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
-        trackList = new ArrayList<>();
-        listView = findViewById(R.id.listview_track);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        initializeViews();
+
         TrackLocation[] trackLocations = {new TrackLocation("29.09", "4.5678989", "Shakir", "Bahrain")};
         trackList.add(new Track("bahr", "fd", "BahrainGP", trackLocations));
-        adapter = new TrackAdapter(this, R.layout.track, trackList);
+
         listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                trackListAsString = trackList.get(position).toString();
+                location = Arrays.toString(trackList.get(position).getTrackLocations()).replaceAll("\\[|\\]","");
+                setUpIntent();
+            }
+        });
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -68,5 +83,21 @@ public class TrackActivity extends AppCompatActivity {
             }
         });
         return super.onCreateOptionsMenu(menu);
+    }
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(this, TrackActivity.class);
+        startActivity(myIntent);
+        return true;
+    }
+    private void initializeViews(){
+        trackList = new ArrayList<>();
+        listView = findViewById(R.id.listview_track);
+        adapter = new TrackAdapter(this, R.layout.track, trackList);
+    }
+    private void setUpIntent(){
+        Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
+        intent.putExtra("track", trackListAsString);
+        intent.putExtra("location", location);
+        startActivity(intent);
     }
 }
