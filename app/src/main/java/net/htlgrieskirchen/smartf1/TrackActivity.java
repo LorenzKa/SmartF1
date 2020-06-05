@@ -23,6 +23,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +62,8 @@ public class TrackActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         trackList = new ArrayList<>();
         listView = findViewById(R.id.listview_track);
 
@@ -126,7 +130,10 @@ public class TrackActivity extends AppCompatActivity {
         Msettings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(TrackActivity.this, PreferenceActivity.class);
+                startActivityForResult(intent, 1);
                 return false;
+
             }
         });
         return super.onCreateOptionsMenu(menu);
@@ -286,6 +293,11 @@ public class TrackActivity extends AppCompatActivity {
         } else {
             return false;
         }
+    }
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(this, MainActivity.class);
+        startActivity(myIntent);
+        return true;
     }
 
 

@@ -163,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
             super.onPostExecute(s);
             currentChampionship.setAdapter(adapter);
             adapter.notifyDataSetChanged();
-         //   writeFile();
         }
 
 
@@ -227,15 +226,12 @@ public class MainActivity extends AppCompatActivity {
                             driverClassed.setConstructors(constructorsArray);
                             driverArrayList.add(driverClassed);
                         }
-
                         driverList.addAll(driverArrayList);
                         writeFile(jsonResponse);
                         return jsonResponse;
                     } else {
                         return "ErrorCodeFromAPI";
-
                     }
-
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
                 }

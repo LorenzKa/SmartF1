@@ -5,7 +5,6 @@
         android:defaultValue="true"
         android:key="notification"
         android:title="Notification"
-
         android:summary="Track in the same country notification"
         />
 </PreferenceScreen>
