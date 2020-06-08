@@ -3,7 +3,10 @@ package net.htlgrieskirchen.smartf1;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -17,6 +20,8 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -34,6 +39,9 @@ public class DetailTrack extends AppCompatActivity {
     private String trackName;
     private String trackLocation;
     private Intent intent;
+    private Bitmap bitmap;
+    private String circuitName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +54,33 @@ public class DetailTrack extends AppCompatActivity {
         initializeViews();
 
         split = trackName.split(",");
-        String circuitName = split[2];
+        circuitName = split[2];
         tvCircuitName.setText(circuitName);
 
-        if (Connection()) {
-            ServerTask st = new ServerTask(split[1].substring(29));
-            st.execute();
-
-
+        if (!fileExist(circuitName)){
+            if (Connection()) {
+                ServerTask st = new ServerTask(split[1].substring(29));
+                st.execute();
+            }else{
+                if (fileExist(circuitName)){
+                    loadIMG();
+                }else{
+                    Toast.makeText(this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen/downloaden!", Toast.LENGTH_LONG).show();
+                }
+            }
         }else{
-            Toast.makeText(DetailTrack.this, "Stellen Sie eine Internetverbindung her um das Streckenbild zu sehen!", Toast.LENGTH_LONG).show();
-        }split = trackLocation.split(",");
+            if (fileExist(circuitName)){
+                    loadIMG();
+                }
+            }
+        split = trackLocation.split(",");
         tvCircuitLocality.setText("Ort: "+split[2]+"\nLand: "+split[3]);
         latlong.setText("Longitude: "+split[0]+"\nLatiude: "+split[1]);
+    }
+    public boolean fileExist(String fileName) {
+        String path = "/data/data/net.htlgrieskirchen.smartf1/app_tracks/"+fileName+".jpg";
+        File file = new File(path);
+        return file.exists();
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
         private final String baseURL = "https://en.wikipedia.org/w/api.php?action=query&titles=";
@@ -91,6 +113,8 @@ public class DetailTrack extends AppCompatActivity {
                     JSONObject pagesWithId = pages.getJSONObject(String.valueOf(id));
                     JSONObject thumbnail = pagesWithId.getJSONObject("thumbnail");
                     url = thumbnail.getString("source");
+                    HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+                    bitmap = BitmapFactory.decodeStream(con.getInputStream());
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -102,10 +126,10 @@ public class DetailTrack extends AppCompatActivity {
         }
         @Override
         protected void onPostExecute(String s) {
-            imageView = findViewById(R.id.imageView);
             if (url != null) {
                 imageView.setBackgroundColor(Color.WHITE);
                 Picasso.with(DetailTrack.this).load(url).into(imageView);
+                saveToInternalStorage(bitmap);
             }
         }
     }
@@ -120,7 +144,7 @@ public class DetailTrack extends AppCompatActivity {
         tvCircuitName = findViewById(R.id.circuitName);
         latlong = findViewById(R.id.latlong);
         tvCircuitLocality = findViewById(R.id.circuitLocality);
-
+        imageView = findViewById(R.id.imageView);
     }
     private void setUpIntent(){
         intent = getIntent();
@@ -145,5 +169,25 @@ public class DetailTrack extends AppCompatActivity {
                 }
         }
         return Wifi || Mobile;
+    }
+    private String saveToInternalStorage(Bitmap bitmapImage) {
+        ContextWrapper cw = new ContextWrapper(getApplicationContext());
+        File directory = cw.getDir("tracks", Context.MODE_PRIVATE);
+        File mypath = new File(directory, circuitName + ".jpg");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return directory.getAbsolutePath();
+    }
+    private void loadIMG(){
+        Bitmap bitmap = BitmapFactory.decodeFile("/data/data/net.htlgrieskirchen.smartf1/app_tracks/"+circuitName+".jpg");
+        imageView.setBackgroundColor(Color.WHITE);
+        imageView.setImageBitmap(bitmap);
+
     }
 }

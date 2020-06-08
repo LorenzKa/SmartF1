@@ -3,11 +3,16 @@ package net.htlgrieskirchen.smartf1;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -25,8 +30,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -53,6 +63,7 @@ public class DetailDriver extends AppCompatActivity {
     private TextView tvFacts;
     private TextView tvSport;
     private String LOG = MainActivity.class.toString();
+    private Bitmap bitmap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +77,30 @@ public class DetailDriver extends AppCompatActivity {
 
         initializeViews();
 
-        if (Connection()) {
-            ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
-            st.execute();
-
-        }else{
-            Toast.makeText(DetailDriver.this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen!", Toast.LENGTH_LONG).show();
+        if (!fileExist(arrayList.get(0).getCode())) {
+            if (Connection()) {
+                    ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
+                    st.execute();
+            } else {
+                if (fileExist(arrayList.get(0).getCode())) {
+                    loadIMG();
+                } else {
+                    Toast.makeText(this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen/downloaden!", Toast.LENGTH_LONG).show();
+                }
+            }
+        } else {
+            if (fileExist(arrayList.get(0).getCode())){
+                loadIMG();
+            }
         }
+
+
+
+    }
+    public boolean fileExist(String fileName) {
+        String path = "/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+fileName+".jpg";
+        File file = new File(path);
+        return file.exists();
     }
     private String calcAge(){
         int age = 0;
@@ -126,45 +154,67 @@ public class DetailDriver extends AppCompatActivity {
         @Override
         protected String doInBackground(String... strings) {
             String sJsonResponse = "";
-                try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(baseURL +  title + endURL).openConnection();
-                    connection.setRequestMethod("GET");
-                    connection.setRequestProperty("Content-Type", "application/json");
-                    int responseCode = connection.getResponseCode();
-                    if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                        StringBuilder stringBuilder = new StringBuilder();
-                        String line = "";
-                        while ((line = reader.readLine()) != null) {
-                            stringBuilder.append(line);
-                        }
-                        String jsonResponse = stringBuilder.toString();
-                        JSONObject jsonObject = new JSONObject(jsonResponse);
-                        JSONObject query = jsonObject.getJSONObject("query");
-                        JSONObject pages = query.getJSONObject("pages");
-                        String id = pages.keys().next();
-                        JSONObject pagesWithId = pages.getJSONObject(String.valueOf(id));
-                        JSONObject thumbnail = pagesWithId.getJSONObject("thumbnail");
-                        url = thumbnail.getString("source");
-                        return jsonResponse;
-                    } else {
-                        return "ErrorCodeFromAPI";
-
+            try {
+                HttpURLConnection connection = (HttpURLConnection) new URL(baseURL + title + endURL).openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Content-Type", "application/json");
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line = "";
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
                     }
+                    String jsonResponse = stringBuilder.toString();
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+                    JSONObject query = jsonObject.getJSONObject("query");
+                    JSONObject pages = query.getJSONObject("pages");
+                    String id = pages.keys().next();
+                    JSONObject pagesWithId = pages.getJSONObject(String.valueOf(id));
+                    JSONObject thumbnail = pagesWithId.getJSONObject("thumbnail");
+                    url = thumbnail.getString("source");
+                    HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+                    bitmap = BitmapFactory.decodeStream(con.getInputStream());
+                    return jsonResponse;
+                } else {
+                    return "ErrorCodeFromAPI";
 
-                } catch (IOException | JSONException e) {
-                    e.printStackTrace();
                 }
-                return sJsonResponse;
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
             }
+            return sJsonResponse;
+        }
 
         @Override
         protected void onPostExecute(String s) {
             if (url != null) {
                 Picasso.with(DetailDriver.this).load(url).into(imageView);
+                saveToInternalStorage(bitmap);
             }
         }
     }
+        private String saveToInternalStorage(Bitmap bitmapImage) {
+            ContextWrapper cw = new ContextWrapper(getApplicationContext());
+            File directory = cw.getDir("drivers", Context.MODE_PRIVATE);
+            File mypath = new File(directory, arrayList.get(0).getCode() + ".jpg");
+
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(mypath);
+                bitmapImage.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return directory.getAbsolutePath();
+        }
     private boolean Connection() {
         boolean Wifi = false;
         boolean Mobile = false;
@@ -199,6 +249,10 @@ public class DetailDriver extends AppCompatActivity {
          tvBiography.setText("Geburtsdatum: "+formatDate()+"\n"+"Alter: "+calcAge()+"\nNationalität: "+arrayList.get(0).getNationality());
          tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+arrayList.get(0).getCode()+"\nNummer: "+arrayList.get(0).getPermanentNumber());
          tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
+    }
+    private void loadIMG(){
+         Bitmap bitmap = BitmapFactory.decodeFile("/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+arrayList.get(0).getCode()+".jpg");
+         imageView.setImageBitmap(bitmap);
     }
 
 }
