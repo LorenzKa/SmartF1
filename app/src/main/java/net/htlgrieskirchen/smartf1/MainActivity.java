@@ -72,17 +72,17 @@ public class MainActivity extends AppCompatActivity {
                     load();
                     System.out.println(driverList);
                     if (driverList.isEmpty()){
-                        ServerTask serverTask = new ServerTask("2019", true);
+                        ServerTask serverTask = new ServerTask( true);
                         serverTask.execute();
                     }
                 }else{
-                    ServerTask serverTask = new ServerTask("2019", true);
+                    ServerTask serverTask = new ServerTask(true);
                     serverTask.execute();
                 }
             } else {
                 ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
-                ServerTask serverTask = new ServerTask("2019", true);
+                ServerTask serverTask = new ServerTask(true);
                 serverTask.execute();
             }
 
@@ -119,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
         Mpast_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(MainActivity.this, PastChampionShipActivity.class);
+                startActivity(intent);
                 return false;
             }
         });
@@ -145,11 +147,10 @@ public class MainActivity extends AppCompatActivity {
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
         private final String baseURL = "http://ergast.com/api/f1/";
-        private String year;
         private boolean driverStandings;
 
-        public ServerTask(String year, boolean driverStandings) {
-            this.year = year;
+        public ServerTask(boolean driverStandings) {
+
             this.driverStandings = driverStandings;
         }
 
@@ -178,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
             if (driverStandings) {
                 typeOfStanding = "driverStandings";
                 try {
-                    HttpURLConnection connection = (HttpURLConnection) new URL(baseURL + year + "/" + typeOfStanding + ".json").openConnection();
+                    HttpURLConnection connection = (HttpURLConnection) new URL(baseURL + "current/" + typeOfStanding + ".json").openConnection();
                     connection.setRequestMethod("GET");
                     connection.setRequestProperty("Content-Type", "application/json");
                     int responseCode = connection.getResponseCode();
@@ -241,25 +242,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private boolean Connection() {
-        boolean Wifi = false;
-        boolean Mobile = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        for (NetworkInfo NI : netInfo) {
-            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
-                if (NI.isConnected()) {
-                    Wifi = true;
-                }
-            }
-            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (NI.isConnected()) {
-                    Mobile = true;
-                }
-        }
-        return Wifi || Mobile;
-    }
     private void writeFile(String response){
         if(isExternalStorageWritable()){
             textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
