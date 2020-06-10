@@ -71,27 +71,26 @@ public class PastChampionShipActivity extends AppCompatActivity {
             arrayList.add(i);
         }
         adapter = new Adapter(this, R.layout.item, driverList);
-        listView.setAdapter(adapter);
         spinner.setAdapter(new ArrayAdapter<Integer>(this, R.layout.spinneritem, arrayList));
+        listView.setAdapter(adapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 driverList.clear();
+                driverArrayList.clear();
                 year = spinner.getSelectedItem().toString();
                 path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/pastchampionships/" + year + ".json";
                 file = new File(path);
-                if (file.exists()) {
-                    driverList.clear();
-                    load();
-                    adapter.notifyDataSetChanged();
-                }else {
+
+                if (file.exists()){
+                    load(year);
+                }else{
                     ServerTask st = new ServerTask(year, true);
                     st.execute();
                 }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
     }
@@ -170,6 +169,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
                                 driverClassed.setConstructors(constructorsArray);
                                 driverArrayList.add(driverClassed);
                             }
+                            reader.close();
                             driverList.addAll(driverArrayList);
                             return jsonResponse;
                         } else {
@@ -200,8 +200,8 @@ public class PastChampionShipActivity extends AppCompatActivity {
             }
         }
     }
-    private void load(){
-        String response = readExternalStorage();
+    private void load(String year){
+        String response = readExternalStorage(year);
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONObject mrdata = jsonObject.getJSONObject("MRData");
@@ -237,11 +237,13 @@ public class PastChampionShipActivity extends AppCompatActivity {
                 driverArrayList.add(driverClassed);
             }
             driverList.addAll(driverArrayList);
+            driverArrayList.clear();
+            adapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
-    private String readExternalStorage(){
+    private String readExternalStorage(String year){
         StringBuilder sb = new StringBuilder();
         file = new File( Environment.getExternalStorageDirectory().getAbsolutePath() + "/pastchampionships/" + year + ".json");
         if (isExternalStorageReadable()){

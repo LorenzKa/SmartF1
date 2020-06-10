@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, PastChampionShipActivity.class);
                 startActivity(intent);
                 return false;
+
             }
         });
         MTracks = menu.findItem(R.id.race_calendar);
@@ -242,6 +243,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
+    }
     private void writeFile(String response){
         if(isExternalStorageWritable()){
             textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
