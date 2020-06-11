@@ -2,11 +2,24 @@ package net.htlgrieskirchen.smartf1;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -57,15 +70,23 @@ public class TrackActivity extends AppCompatActivity {
     private static final String FILE_NAME = "tracks.json";
     private File textFile;
     private String response;
+    private LocationListener locationListener;
+    private LocationManager locationManager;
+    private double lat;
+    private double lon;
+    private Context context;
+    private SharedPreferences prefs ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_track);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
+        context = TrackActivity.this;
         trackList = new ArrayList<>();
         listView = findViewById(R.id.listview_track);
+        prefs = PreferenceManager.getDefaultSharedPreferences(this );
+
 
         textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
 
@@ -84,7 +105,10 @@ public class TrackActivity extends AppCompatActivity {
                     s.execute();
                 }
             }
-
+        if((checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED&&prefs.getBoolean("notification", true))){
+            gps();
+        }
         adapter = new TrackAdapter(this, R.layout.track, trackList);
         listView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -126,17 +150,142 @@ public class TrackActivity extends AppCompatActivity {
                 return false;
             }
         });
-        Msettings = menu.findItem(R.id.settings);
-        Msettings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+        return super.onCreateOptionsMenu(menu);
+    }
+    public void gps(){
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+        Location location = null;
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_COARSE);
+        criteria.setCostAllowed(false);
+        String provider = locationManager.getBestProvider(criteria, false);
+        locationListener = new LocationListener() {
             @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(TrackActivity.this, PreferenceActivity.class);
-                startActivityForResult(intent, 1);
-                return false;
+            public void onLocationChanged(Location location) {
+                lat = location.getLatitude();
+                lon = location.getLongitude();
+                if(prefs.getBoolean("notification", true)) {
+                    ServerTask2 st2 = new ServerTask2();
+                    st2.execute();
+                }
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
 
             }
-        });
-        return super.onCreateOptionsMenu(menu);
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
+        onResume();
+
+        try {
+            location = locationManager.getLastKnownLocation(provider);
+            if (location != null) {
+                lon = location.getLongitude();
+                lat = location.getLatitude();
+            }
+        } catch (SecurityException e) {
+            Log.e("SecurityException", e.getMessage());
+        }
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(locationManager != null) {
+            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                locationManager.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        1000000,
+                        1000,
+                        locationListener);
+            }
+        }
+    }
+
+    public class ServerTask2 extends AsyncTask<String, Integer, String> {
+        String countryOfUser;
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                String jsonResponse;
+                HttpURLConnection connection = (HttpURLConnection) new URL("https://eu1.locationiq.com/v1/reverse.php?key=1465ff08166a42&lat=" + lat + "&lon="+lon+"&format=json").openConnection();
+                connection.setRequestMethod("GET");
+                connection.setRequestProperty("Content-Type", "application/json");
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_CREATED) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuilder stringBuilder = new StringBuilder();
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        stringBuilder.append(line);
+                    }
+                    jsonResponse = stringBuilder.toString();
+                    JSONObject jsonObject = new JSONObject(jsonResponse);
+                    JSONObject data = jsonObject.getJSONObject("address");
+                    String country = data.getString("country");
+                    return country;
+                } else {
+                    return "error";
+                }
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
+            return "error";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            for (int i = 0; i < trackList.size(); i++) {
+                if(trackList.get(i).getLocation().getCountry().toLowerCase().equals(s.toLowerCase())&&!trackList.get(i).isNotified()){
+                    if (Build.VERSION.SDK_INT>= Build.VERSION_CODES.O) {
+                        CharSequence name = "channel";
+                        String description = "channel";
+                        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                        NotificationChannel channel = new NotificationChannel("TrackNotification", name, importance);
+                        channel. setDescription ( description );
+                        NotificationManager notificationManager = getSystemService(NotificationManager. class );
+                        notificationManager.createNotificationChannel(channel);
+                    }
+                    trackListAsString = trackList.get(i).toString();
+                    location = trackList.get(i).getLocation().toString();
+                    Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
+
+                    intent.putExtra("track", trackListAsString);
+                    intent.putExtra("location", location);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    PendingIntent pendingIntent =
+                            PendingIntent.getActivity(context, 0, intent, 0);
+                    Notification.Builder builder = new
+                            Notification.Builder(context, "TrackNotification")
+                            .setSmallIcon(android.R.drawable.star_big_on)
+                            .setColor(Color.RED)
+                            .setContentTitle(getString(R.string.app_name))
+                            .setContentIntent(pendingIntent)
+                            .setAutoCancel(true)
+                            .setContentText("Die Rennstrecke "+ trackList.get(i).getCircuitName()+" befindet sich in deinem Land")
+                            .setWhen(System.currentTimeMillis());
+
+                    NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    int notificationId = 1;
+                    notificationManager.notify(notificationId, builder.build());
+                    trackList.get(i).setNotified(true);
+
+                }
+            }
+        }
     }
 
     public class ServerTask extends AsyncTask<String, Integer, String> {
@@ -156,6 +305,7 @@ public class TrackActivity extends AppCompatActivity {
             super.onPostExecute(s);
             adapter.notifyDataSetChanged();
             writeFile(trackList);
+
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -190,6 +340,7 @@ public class TrackActivity extends AppCompatActivity {
                         JSONObject driverAndConstructor = circuitsArray.getJSONObject(i);
                         JsonElement driverElement = parser.parse(driverAndConstructor.toString());
                         Track trackClassed = gson.fromJson(driverElement, Track.class);
+                        trackClassed.setNotified(false);
                         JSONObject location = driverAndConstructor.getJSONObject("Location");
                         String latitude = location.getString("lat");
                         String longitude = location.getString("long");
@@ -211,6 +362,7 @@ public class TrackActivity extends AppCompatActivity {
             return jsonResponse;
         }
     }
+
 
     private void setUpIntent() {
         Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
@@ -285,6 +437,12 @@ public class TrackActivity extends AppCompatActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        if((checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED&&prefs.getBoolean("notification", true))){
+            ServerTask2 st2 = new ServerTask2();
+            st2.execute();
+        }
+
     }
     private boolean checkPermission(){
         int result = ContextCompat.checkSelfPermission(TrackActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);

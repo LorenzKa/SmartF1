@@ -5,12 +5,15 @@ import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,6 +25,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+
+import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +45,10 @@ import java.util.Calendar;
 import java.util.List;
 
 public class PastChampionShipActivity extends AppCompatActivity {
-
+    private MenuItem Mcurrent_championships;
+    private MenuItem Mpast_championships;
+    private MenuItem MTracks;
+    private MenuItem Msettings;
     private Spinner spinner;
     private ListView listView;
     private ArrayList<Integer> arrayList;
@@ -93,6 +101,49 @@ public class PastChampionShipActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        Mcurrent_championships = menu.findItem(R.id.current_championship);
+        Mcurrent_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(PastChampionShipActivity.this, MainActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+        Mpast_championships = menu.findItem(R.id.past_championship);
+        Mpast_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(PastChampionShipActivity.this, PastChampionShipActivity.class);
+                startActivity(intent);
+                return false;
+
+            }
+        });
+        MTracks = menu.findItem(R.id.race_calendar);
+        MTracks.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(PastChampionShipActivity.this, TrackActivity.class);
+                startActivity(intent);
+                return false;
+            }
+        });
+        Msettings = menu.findItem(R.id.settings);
+        Msettings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                Intent intent = new Intent(PastChampionShipActivity.this, PreferenceActivity.class);
+                startActivityForResult(intent, 1);
+                return false;
+
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
         private final String baseURL = "http://ergast.com/api/f1/";
@@ -183,6 +234,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
             return jsonResponse;
         }
     }
+
     private void writeFile(String response){
         if(isExternalStorageWritable()){
             File sd = Environment.getExternalStorageDirectory();

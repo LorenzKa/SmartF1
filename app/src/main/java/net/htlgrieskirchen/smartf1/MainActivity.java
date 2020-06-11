@@ -7,15 +7,41 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.Permission;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,35 +49,39 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem Mpast_championships;
     private MenuItem MTracks;
     private MenuItem Msettings;
-
+    private LocationListener locationListener;
+    private LocationManager locationManager;
+    private double lat;
+    private double lon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
 
-        if(shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
-            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-            dialogBuilder.setMessage("Sie müssen die Berechtigung für die SD-Card hergeben um den offline Modus nutzen zu können");
-            dialogBuilder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
 
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
-                }
-            });
-            dialogBuilder.setTitle("Info");
-            dialogBuilder.setIcon(android.R.drawable.ic_dialog_alert);
-            dialogBuilder.show();
+
+        if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new
+                    String[]{Manifest.permission.READ_EXTERNAL_STORAGE},1);
         }
+        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new
+                    String[]{Manifest.permission.ACCESS_FINE_LOCATION},2);
+        }
+
+
+
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
         bottomNav.setOnNavigationItemSelectedListener(navListener);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                     new DriverChampionShipFragment()).commit();
         }
+
     }
     private BottomNavigationView.OnNavigationItemSelectedListener navListener =
             new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -118,4 +148,30 @@ public class MainActivity extends AppCompatActivity {
         });
         return super.onCreateOptionsMenu(menu);
     }
+    @Override
+    public void onRequestPermissionsResult( int requestCode,
+                                            @NonNull String[] permissions ,
+                                            @NonNull int[] grantResults ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 2) {
+            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+
+                Toast.makeText(this,
+                        "GPS Permission wurde verweigert!",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+        else if (requestCode == 1) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                    new DriverChampionShipFragment()).commit();
+            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+
+                Toast.makeText(this,
+                        "SD Card Permission wurde verweigert!",
+                        Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+
 }

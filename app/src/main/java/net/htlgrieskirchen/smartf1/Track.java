@@ -6,6 +6,15 @@ public class Track {
     private String url;
     private String circuitName;
     private TrackLocation Location;
+    private boolean notified;
+
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified(boolean notified) {
+        this.notified = notified;
+    }
 
     public String getCircuitId() {
         return circuitId;
@@ -32,11 +41,12 @@ public class Track {
         return circuitName;
     }
 
-    public Track(String circuitId, String url, String circuitName, TrackLocation Location) {
+    public Track(String circuitId, String url, String circuitName, TrackLocation location, boolean notified) {
         this.circuitId = circuitId;
         this.url = url;
         this.circuitName = circuitName;
-        this.Location = Location;
+        Location = location;
+        this.notified = notified;
     }
 
     public void setCircuitName(String circuitName) {
