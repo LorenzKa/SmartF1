@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/driverChampionship"
+        android:icon="@drawable/championship"
+        android:title="Fahrer Meisterschaft" />
+    <item
+        android:id="@+id/constructorChampionship"
+        android:icon="@drawable/team"
+        android:title="Team Meisterschaft" />
+    <item
+        android:id="@+id/raceResult"
+        android:icon="@drawable/race_flag"
+        android:title="Rennergebnis" />
+</menu>
