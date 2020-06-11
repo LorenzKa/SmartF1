@@ -1,8 +1,11 @@
 package net.htlgrieskirchen.smartf1;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -12,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -32,50 +36,47 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- */
 public class DriverChampionShipFragment extends Fragment {
-    ListView listView;
-    List<Driver> driverList;
-    List<Driver> driverArrayList;
+    private ListView listView;
+    private List<Driver> driverList;
+    private List<Driver> driverArrayList;
     private static final String FILE_NAME = "drivers.json";
     private File textFile;
-    Adapter adapter;
-    String jsonResponse;
+    private Adapter adapter;
+    private String jsonResponse;
+    private Date date;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_championship, container, false);
-        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-        adapter = new Adapter(getActivity(), R.layout.item, driverList);
-        listView = (ListView) view.findViewById(R.id.listview);
         driverArrayList = new ArrayList<>();
         driverList = new ArrayList<>();
-
-        load();
-        adapter.notifyDataSetChanged();
-
-
-//                    ServerTask serverTask = new ServerTask(true);
-//                    serverTask.execute();
-
-//                ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 123);
-//                ServerTask serverTask = new ServerTask(true);
-//                serverTask.execute();
+        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+        adapter = new Adapter(getActivity(), R.layout.item, driverList);
+        listView = (ListView) view.findViewById(R.id.listview_championship);
+        listView.setAdapter(adapter);
+        System.out.println(date);
 
 
-
-            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        if (Connection()){
+            ServerTask serverTask = new ServerTask(true);
+            serverTask.execute();
+        }else if(!Connection() && checkPermission()){
+            load();
+            Toast.makeText(getActivity(), "Sie befinden sich im offline Modus!", Toast.LENGTH_LONG).show();
+        }
+        if (!checkPermission() && !Connection()){
+            Toast.makeText(getActivity(), "Sie müssen SD-Card Berechtigung hergeben oder eine Internetvebindung herstellen!", Toast.LENGTH_LONG).show();
+        }
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String driver = driverList.get(position).toString();
@@ -87,7 +88,6 @@ public class DriverChampionShipFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
         return view;
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
@@ -201,6 +201,7 @@ public class DriverChampionShipFragment extends Fragment {
         }
     }
     private void load(){
+        listView.setAdapter(adapter);
         String response = readExternalStorage();
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -282,5 +283,24 @@ public class DriverChampionShipFragment extends Fragment {
         } else {
             return false;
         }
+    }
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
     }
 }

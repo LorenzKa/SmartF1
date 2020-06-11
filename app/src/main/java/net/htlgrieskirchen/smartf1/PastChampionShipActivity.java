@@ -271,23 +271,4 @@ public class PastChampionShipActivity extends AppCompatActivity {
     private boolean isExternalStorageWritable(){
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
-    private boolean Connection() {
-        boolean Wifi = false;
-        boolean Mobile = false;
-
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
-        for (NetworkInfo NI : netInfo) {
-            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
-                if (NI.isConnected()) {
-                    Wifi = true;
-                }
-            }
-            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
-                if (NI.isConnected()) {
-                    Mobile = true;
-                }
-        }
-        return Wifi || Mobile;
-    }
 }
