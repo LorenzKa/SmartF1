@@ -57,7 +57,6 @@ public class DriverChampionShipFragment extends Fragment {
     private File textFile;
     private DriverAdapter driverAdapter;
     private String jsonResponse;
-    private boolean exception;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -116,9 +115,6 @@ public class DriverChampionShipFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            if (exception){
-                load();
-            }
             listView.setAdapter(driverAdapter);
             driverAdapter.notifyDataSetChanged();
         }
@@ -191,8 +187,7 @@ public class DriverChampionShipFragment extends Fragment {
                         return "ErrorCodeFromAPI";
                     }
                 } catch (IOException | JSONException e) {
-                    e.printStackTrace();
-                    exception = true;
+                   doInBackground();
                 }
                 return sJsonResponse;
             }

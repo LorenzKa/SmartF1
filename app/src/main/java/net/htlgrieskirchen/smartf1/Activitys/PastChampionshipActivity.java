@@ -229,7 +229,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
                             return "ErrorCodeFromAPI";
                         }
                     } catch (IOException | JSONException e) {
-                        e.printStackTrace();
+                        doInBackground();
                     }
                     return sJsonResponse;
                 }

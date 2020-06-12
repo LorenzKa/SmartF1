@@ -112,7 +112,7 @@ public class LastRaceFragment extends Fragment {
                     return "ErrorCodeFromAPI";
                 }
             } catch (IOException | JSONException e) {
-                e.printStackTrace();
+                doInBackground();
             }
             return "jsonResponse";
         }
