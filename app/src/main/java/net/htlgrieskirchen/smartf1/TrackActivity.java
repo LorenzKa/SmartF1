@@ -282,6 +282,7 @@ public class TrackActivity extends AppCompatActivity {
                     int notificationId = 1;
                     notificationManager.notify(notificationId, builder.build());
                     trackList.get(i).setNotified(true);
+                    writeFile(trackList);
 
                 }
             }
@@ -304,8 +305,6 @@ public class TrackActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             adapter.notifyDataSetChanged();
-            writeFile(trackList);
-
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -352,6 +351,7 @@ public class TrackActivity extends AppCompatActivity {
                     }
                     //   trackList = new ArrayList<>();
                     trackList.addAll(privateTrackList);
+                    writeFile(trackList);
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
