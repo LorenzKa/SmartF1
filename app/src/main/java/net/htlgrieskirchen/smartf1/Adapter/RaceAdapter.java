@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import net.htlgrieskirchen.smartf1.Beans.Constructor;
 import net.htlgrieskirchen.smartf1.Beans.Driver;
 import net.htlgrieskirchen.smartf1.Beans.RaceResult;
 import net.htlgrieskirchen.smartf1.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,11 +25,14 @@ public class RaceAdapter extends BaseAdapter {
     private TextView tvRaceFastestLap;
     private TextView tvRaceDriverName;
     private TextView tvRacePoints;
+    private List<Driver> drivers;
+
 
     public RaceAdapter(Context context, int listViewItemLayoutId, List<RaceResult> raceResults) {
         this.listViewItemLayoutId = listViewItemLayoutId;
         this.raceResults = raceResults;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        drivers = new ArrayList<>();
     }
 
     @Override
@@ -59,27 +64,34 @@ public class RaceAdapter extends BaseAdapter {
         tvRacePosition = listItemView.findViewById(R.id.racePosition);
         RaceResult result = this.raceResults.get(position);
 
-
+        for (int i = 0; i < raceResults.size(); i++) {
+            if (raceResults.get(i).getFastestLap().getRank().equals("1")) {
+                drivers.add(new Driver(null, "0", raceResults.get(i).getDriver().getCode(), "", "", "", "", "", null, "", ""));
+            }
+        }
         if (result == null) {
 
         } else {
             tvRacePosition.setText(String.valueOf(position + 1));
             tvRacePoints.setText(result.getPoints());
-            if(result.getFastestLap().getRank().equals("1")){
-                System.out.println(result.getFastestLap().getRank());
-                tvRacePoints.setTextColor(Color.MAGENTA);
-            }
             tvRaceDriverName.setText(result.getDriver().getGivenName() + " " + result.getDriver().getFamilyName().toUpperCase());
+
+            if (drivers.get(0).getCode().equals(raceResults.get(position).getDriver().getCode())){
+                tvRacePoints.setTextColor(Color.MAGENTA);
+            }else{
+                tvRacePoints.setTextColor(Color.GRAY);
+            }
+
             if (result.getTime()==null) {
                 if(result.getPositionText().equals("R")){
                     tvRaceFastestLap.setText("DNF");
-                }
-                else{
+                }else{
                     tvRaceFastestLap.setText(result.getStatus());
                 }
-            } else {
+            }else{
                 tvRaceFastestLap.setText(result.getTime().getTime());
             }
+
         }
         return listItemView;
     }

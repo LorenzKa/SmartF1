@@ -26,6 +26,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -56,7 +57,7 @@ public class DriverChampionShipFragment extends Fragment {
     private File textFile;
     private DriverAdapter driverAdapter;
     private String jsonResponse;
-    private Date date;
+    private boolean exception;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -65,22 +66,25 @@ public class DriverChampionShipFragment extends Fragment {
         driverArrayList = new ArrayList<>();
         driverList = new ArrayList<>();
         textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-        driverAdapter = new DriverAdapter(getActivity(), R.layout.item, driverList);
+        driverAdapter = new DriverAdapter(getActivity(), R.layout.championship_item, driverList);
         listView = (ListView) view.findViewById(R.id.listview_championship);
         listView.setAdapter(driverAdapter);
-        System.out.println(date);
 
 
-        if (Connection()){
-            ServerTask serverTask = new ServerTask(true);
-            serverTask.execute();
-        }else if(!Connection() && checkPermission()){
-            load();
-            Toast.makeText(getActivity(), "Sie befinden sich im offline Modus!", Toast.LENGTH_LONG).show();
-        }
-        if (!checkPermission() && !Connection()){
-            Toast.makeText(getActivity(), "Sie müssen SD-Card Berechtigung hergeben oder eine Internetvebindung herstellen!", Toast.LENGTH_LONG).show();
-        }
+
+            if (Connection()){
+                ServerTask serverTask = new ServerTask(true);
+                serverTask.execute();
+            }else if(!Connection() && checkPermission()){
+                load();
+                Toast.makeText(getActivity(), "Sie befinden sich im offline Modus!", Toast.LENGTH_LONG).show();
+            }
+            if (!checkPermission() && !Connection()){
+                Toast.makeText(getActivity(), "Sie müssen SD-Card Berechtigung hergeben oder eine Internetvebindung herstellen!", Toast.LENGTH_LONG).show();
+            }
+            if (!driverAdapter.isEmpty()){
+                load();
+            }
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -112,6 +116,9 @@ public class DriverChampionShipFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            if (exception){
+                load();
+            }
             listView.setAdapter(driverAdapter);
             driverAdapter.notifyDataSetChanged();
         }
@@ -185,6 +192,7 @@ public class DriverChampionShipFragment extends Fragment {
                     }
                 } catch (IOException | JSONException e) {
                     e.printStackTrace();
+                    exception = true;
                 }
                 return sJsonResponse;
             }
@@ -206,7 +214,6 @@ public class DriverChampionShipFragment extends Fragment {
         }
     }
     private void load(){
-        listView.setAdapter(driverAdapter);
         String response = readExternalStorage();
         try {
             JSONObject jsonObject = new JSONObject(response);

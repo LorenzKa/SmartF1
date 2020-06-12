@@ -13,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +41,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 public class PastChampionshipActivity extends AppCompatActivity {
     private MenuItem Mcurrent_championships;
@@ -75,7 +78,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
         for (int i = now-1; i > 1949; i--) {
             arrayList.add(i);
         }
-        driverAdapter = new DriverAdapter(this, R.layout.item, driverList);
+        driverAdapter = new DriverAdapter(this, R.layout.championship_item, driverList);
         spinner.setAdapter(new ArrayAdapter<Integer>(this, R.layout.spinneritem, arrayList));
         listView.setAdapter(driverAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -154,6 +157,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+
             driverAdapter.notifyDataSetChanged();
 
         }

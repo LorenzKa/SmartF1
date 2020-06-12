@@ -15,9 +15,9 @@ public class TrackAdapter extends BaseAdapter {
     private final int listViewItemLayoutId;
     private List<Track> track;
     private LayoutInflater layoutInflater;
-    public TrackAdapter(Context context, int listViewItemLayoutId, List<Track> driver) {
+    public TrackAdapter(Context context, int listViewItemLayoutId, List<Track> track) {
         this.listViewItemLayoutId = listViewItemLayoutId;
-        this.track = driver;
+        this.track = track;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
     @Override

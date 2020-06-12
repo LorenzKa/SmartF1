@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -14,6 +15,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
+import net.htlgrieskirchen.smartf1.Adapter.ConstructorAdapter;
+import net.htlgrieskirchen.smartf1.Adapter.RaceAdapter;
 import net.htlgrieskirchen.smartf1.Beans.Constructor;
 import net.htlgrieskirchen.smartf1.Beans.ConstructorResult;
 import net.htlgrieskirchen.smartf1.Beans.Driver;
@@ -38,23 +41,27 @@ import java.util.List;
  * status bar and navigation/system bar) with user interaction.
  */
 public class ConstructorChampionshipFragment extends Fragment {
-    List<ConstructorResult> constructorResults;
+     List<ConstructorResult> constructorResults;
+     ListView listView;
+     ConstructorAdapter adapter;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_team, container, false);
         constructorResults = new ArrayList<>();
+        listView = view.findViewById(R.id.listview_constructor);
+        adapter = new ConstructorAdapter(getActivity(), R.layout.constructor_item, constructorResults);
+        listView.setAdapter(adapter);
         ServerTask st = new ServerTask();
         st.execute();
-        return inflater.inflate(R.layout.fragment_team, container, false);
+        return view;
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
         private final String baseURL = "http://ergast.com/api/f1/";
-        private boolean driverStandings;
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            //listView.setAdapter(driverAdapter);
-            //driverAdapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         }
         @Override
         protected String doInBackground(String... strings) {
