@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
+import android.widget.ListView;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -16,6 +17,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.htlgrieskirchen.smartf1.Adapter.RaceAdapter;
 import net.htlgrieskirchen.smartf1.Beans.RaceResult;
 import net.htlgrieskirchen.smartf1.Beans.Track;
 import net.htlgrieskirchen.smartf1.Beans.TrackLocation;
@@ -39,13 +41,18 @@ import java.util.List;
  * status bar and navigation/system bar) with user interaction.
  */
 public class LastRaceFragment extends Fragment {
-    Adapter adapter;
+    RaceAdapter adapter;
     List<RaceResult> raceResults;
+    ListView listView;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lastrace, container, false);
         raceResults = new ArrayList<>();
+        listView = view.findViewById(R.id.listview_lastrace);
+        adapter = new RaceAdapter(getActivity(), R.layout.raceresult_item, raceResults);
+        listView.setAdapter(adapter);
         ServerTask st = new ServerTask();
         st.execute();
         return view;
@@ -59,7 +66,7 @@ public class LastRaceFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            //adapter.notifyDataSetChanged();
+            adapter.notifyDataSetChanged();
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
