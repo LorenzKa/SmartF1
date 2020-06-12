@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/rounded_corner">
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1.3">
+        <TextView
+            android:id="@+id/racePosition"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_margin="10sp"
+            android:fontFamily="@font/driverconstructor"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="TextView"
+            android:textColor="@color/colorFont"
+            android:textSize="30dp" />
+    </TableRow>
+    <TableRow
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.35">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/raceDrivername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/driverconstructor"
+                android:padding="5sp"
+                android:text="TextView"
+                android:textColor="@color/colorFont"
+                android:textSize="17dp" />
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+                <TextView
+                    android:id="@+id/raceFastestLap"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:fontFamily="@font/driverconstructor"
+                    android:padding="5sp"
+                    android:text="TextView"
+                    android:textColor="@color/colorFont"
+                    android:textSize="17dp" />
+                <TextView
+                    android:id="@+id/racePoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="right"
+                    android:fontFamily="@font/drivernumb"
+                    android:gravity="right"
+                    android:padding="5sp"
+                    android:text="TextView"
+                    android:textSize="17dp" />
+            </TableRow>
+        </LinearLayout>
+    </TableRow>
+</LinearLayout>
