@@ -1,4 +1,4 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Activitys;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,6 +17,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.squareup.picasso.Picasso;
+
+import net.htlgrieskirchen.smartf1.R;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.BufferedReader;

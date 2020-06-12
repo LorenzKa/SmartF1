@@ -1,4 +1,4 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Activitys;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -28,15 +28,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
+import net.htlgrieskirchen.smartf1.Adapter.TrackAdapter;
+import net.htlgrieskirchen.smartf1.Beans.Track;
+import net.htlgrieskirchen.smartf1.Beans.TrackLocation;
+import net.htlgrieskirchen.smartf1.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -51,7 +52,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
@@ -63,8 +63,6 @@ public class TrackActivity extends AppCompatActivity {
     private List<Track> trackList;
     private ListView listView;
     private TrackAdapter adapter;
-    private String location;
-    private String trackListAsString;
     private String jsonResponse;
     private int size;
     private static final String FILE_NAME = "tracks.json";
@@ -115,9 +113,9 @@ public class TrackActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                trackListAsString = trackList.get(position).toString();
-                location = trackList.get(position).getLocation().toString();
-                setUpIntent();
+                String trackListAsString = trackList.get(position).toString();
+                String location = trackList.get(position).getLocation().toString();
+                setUpIntent(trackListAsString, location);
             }
         });
     }
@@ -258,8 +256,8 @@ public class TrackActivity extends AppCompatActivity {
                         NotificationManager notificationManager = getSystemService(NotificationManager. class );
                         notificationManager.createNotificationChannel(channel);
                     }
-                    trackListAsString = trackList.get(i).toString();
-                    location = trackList.get(i).getLocation().toString();
+                    String trackListAsString = trackList.get(i).toString();
+                    String location = trackList.get(i).getLocation().toString();
                     Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
 
                     intent.putExtra("track", trackListAsString);
@@ -364,7 +362,7 @@ public class TrackActivity extends AppCompatActivity {
     }
 
 
-    private void setUpIntent() {
+    private void setUpIntent(String trackListAsString, String location) {
         Intent intent = new Intent(TrackActivity.this, DetailTrack.class);
         intent.putExtra("track", trackListAsString);
         intent.putExtra("location", location);

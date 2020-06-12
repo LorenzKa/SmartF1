@@ -1,16 +1,18 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Adapter;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import net.htlgrieskirchen.smartf1.Beans.Driver;
+import net.htlgrieskirchen.smartf1.R;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class Adapter extends BaseAdapter {
+public class DriverAdapter extends BaseAdapter {
     private final int listViewItemLayoutId;
     private List<Driver> driver;
     private LayoutInflater layoutInflater;
@@ -20,7 +22,7 @@ public class Adapter extends BaseAdapter {
     private TextView tvConstructor;
     private String constructor;
 
-    public Adapter(Context context, int listViewItemLayoutId, List<Driver> driver) {
+    public DriverAdapter(Context context, int listViewItemLayoutId, List<Driver> driver) {
         this.listViewItemLayoutId = listViewItemLayoutId;
         this.driver = driver;
         this.layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

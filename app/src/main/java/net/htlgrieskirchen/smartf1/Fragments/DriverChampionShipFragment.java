@@ -1,4 +1,4 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Fragments;
 
 import android.Manifest;
 import android.content.Context;
@@ -9,7 +9,6 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,13 +42,19 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import net.htlgrieskirchen.smartf1.Adapter.DriverAdapter;
+import net.htlgrieskirchen.smartf1.Beans.Constructor;
+import net.htlgrieskirchen.smartf1.Beans.Driver;
+import net.htlgrieskirchen.smartf1.Activitys.DetailDriver;
+import net.htlgrieskirchen.smartf1.R;
+
 public class DriverChampionShipFragment extends Fragment {
     private ListView listView;
     private List<Driver> driverList;
     private List<Driver> driverArrayList;
     private static final String FILE_NAME = "drivers.json";
     private File textFile;
-    private Adapter adapter;
+    private DriverAdapter driverAdapter;
     private String jsonResponse;
     private Date date;
     @Nullable
@@ -60,9 +65,9 @@ public class DriverChampionShipFragment extends Fragment {
         driverArrayList = new ArrayList<>();
         driverList = new ArrayList<>();
         textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-        adapter = new Adapter(getActivity(), R.layout.item, driverList);
+        driverAdapter = new DriverAdapter(getActivity(), R.layout.item, driverList);
         listView = (ListView) view.findViewById(R.id.listview_championship);
-        listView.setAdapter(adapter);
+        listView.setAdapter(driverAdapter);
         System.out.println(date);
 
 
@@ -107,8 +112,8 @@ public class DriverChampionShipFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            listView.setAdapter(adapter);
-            adapter.notifyDataSetChanged();
+            listView.setAdapter(driverAdapter);
+            driverAdapter.notifyDataSetChanged();
         }
 
 
@@ -201,7 +206,7 @@ public class DriverChampionShipFragment extends Fragment {
         }
     }
     private void load(){
-        listView.setAdapter(adapter);
+        listView.setAdapter(driverAdapter);
         String response = readExternalStorage();
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -238,7 +243,7 @@ public class DriverChampionShipFragment extends Fragment {
                 driverArrayList.add(driverClassed);
             }
             driverList.addAll(driverArrayList);
-            adapter.notifyDataSetChanged();
+            driverAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
         }

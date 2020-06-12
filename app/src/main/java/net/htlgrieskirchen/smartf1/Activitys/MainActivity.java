@@ -1,47 +1,26 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Activitys;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
-import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.security.Permission;
-import java.util.ArrayList;
-import java.util.List;
+import net.htlgrieskirchen.smartf1.Fragments.ConstructorChampionshipFragment;
+import net.htlgrieskirchen.smartf1.Fragments.DriverChampionShipFragment;
+import net.htlgrieskirchen.smartf1.Fragments.LastRaceFragment;
+import net.htlgrieskirchen.smartf1.Preferences.PreferenceActivity;
+import net.htlgrieskirchen.smartf1.R;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -122,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         Mpast_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(MainActivity.this, PastChampionShipActivity.class);
+                Intent intent = new Intent(MainActivity.this, PastChampionshipActivity.class);
                 startActivity(intent);
                 return false;
 

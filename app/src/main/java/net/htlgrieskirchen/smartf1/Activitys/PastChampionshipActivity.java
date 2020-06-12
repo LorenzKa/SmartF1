@@ -1,14 +1,8 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Activitys;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -19,14 +13,17 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-import net.htlgrieskirchen.smartf1.Preference.PreferenceActivity;
+import net.htlgrieskirchen.smartf1.Adapter.DriverAdapter;
+import net.htlgrieskirchen.smartf1.Beans.Constructor;
+import net.htlgrieskirchen.smartf1.Beans.Driver;
+import net.htlgrieskirchen.smartf1.Preferences.PreferenceActivity;
+import net.htlgrieskirchen.smartf1.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -44,7 +41,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class PastChampionShipActivity extends AppCompatActivity {
+public class PastChampionshipActivity extends AppCompatActivity {
     private MenuItem Mcurrent_championships;
     private MenuItem Mpast_championships;
     private MenuItem MTracks;
@@ -55,7 +52,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
     private String jsonResponse;
     private ArrayList<Driver> driverArrayList = new ArrayList<>();
     private ArrayList<Driver> driverList;
-    private Adapter adapter;
+    private DriverAdapter driverAdapter;
     private String year;
     private File file;
     private String path;
@@ -75,12 +72,12 @@ public class PastChampionShipActivity extends AppCompatActivity {
         Calendar calendar = Calendar.getInstance();
         int now = calendar.get(Calendar.YEAR);
 
-        for (int i = 1950; i < now; i++) {
+        for (int i = now-1; i > 1949; i--) {
             arrayList.add(i);
         }
-        adapter = new Adapter(this, R.layout.item, driverList);
+        driverAdapter = new DriverAdapter(this, R.layout.item, driverList);
         spinner.setAdapter(new ArrayAdapter<Integer>(this, R.layout.spinneritem, arrayList));
-        listView.setAdapter(adapter);
+        listView.setAdapter(driverAdapter);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -109,7 +106,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
         Mcurrent_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(PastChampionShipActivity.this, MainActivity.class);
+                Intent intent = new Intent(PastChampionshipActivity.this, MainActivity.class);
                 startActivity(intent);
                 return false;
             }
@@ -118,7 +115,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
         Mpast_championships.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(PastChampionShipActivity.this, PastChampionShipActivity.class);
+                Intent intent = new Intent(PastChampionshipActivity.this, PastChampionshipActivity.class);
                 startActivity(intent);
                 return false;
 
@@ -128,7 +125,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
         MTracks.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(PastChampionShipActivity.this, TrackActivity.class);
+                Intent intent = new Intent(PastChampionshipActivity.this, TrackActivity.class);
                 startActivity(intent);
                 return false;
             }
@@ -137,7 +134,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
         Msettings.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                Intent intent = new Intent(PastChampionShipActivity.this, PreferenceActivity.class);
+                Intent intent = new Intent(PastChampionshipActivity.this, PreferenceActivity.class);
                 startActivityForResult(intent, 1);
                 return false;
 
@@ -157,8 +154,8 @@ public class PastChampionShipActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-            adapter.notifyDataSetChanged();
-            writeFile(jsonResponse);
+            driverAdapter.notifyDataSetChanged();
+
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -222,6 +219,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
                             }
                             reader.close();
                             driverList.addAll(driverArrayList);
+                            writeFile(jsonResponse);
                             return jsonResponse;
                         } else {
                             return "ErrorCodeFromAPI";
@@ -290,7 +288,7 @@ public class PastChampionShipActivity extends AppCompatActivity {
             }
             driverList.addAll(driverArrayList);
             driverArrayList.clear();
-            adapter.notifyDataSetChanged();
+            driverAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
             e.printStackTrace();
         }

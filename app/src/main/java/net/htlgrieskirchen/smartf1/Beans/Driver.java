@@ -1,4 +1,4 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Beans;
 
 
 public class Driver  {

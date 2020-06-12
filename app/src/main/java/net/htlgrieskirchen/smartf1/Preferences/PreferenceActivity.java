@@ -1,13 +1,13 @@
-package net.htlgrieskirchen.smartf1.Preference;
+package net.htlgrieskirchen.smartf1.Preferences;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import net.htlgrieskirchen.smartf1.MainActivity;
+import net.htlgrieskirchen.smartf1.Activitys.MainActivity;
 import net.htlgrieskirchen.smartf1.R;
-import net.htlgrieskirchen.smartf1.TrackActivity;
+import net.htlgrieskirchen.smartf1.Activitys.TrackActivity;
 
 import androidx.appcompat.app.AppCompatActivity;
 

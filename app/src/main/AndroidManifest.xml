@@ -11,12 +11,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".PastChampionShipActivity"></activity>
-        <activity android:name=".DetailTrack" />
-        <activity android:name=".TrackActivity" />
-        <activity android:name=".DetailDriver" />
-        <activity android:name=".Preference.PreferenceActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activitys.PastChampionshipActivity"></activity>
+        <activity android:name=".Activitys.DetailTrack" />
+        <activity android:name=".Activitys.TrackActivity" />
+        <activity android:name=".Activitys.DetailDriver" />
+        <activity android:name=".Preferences.PreferenceActivity" />
+        <activity android:name=".Activitys.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

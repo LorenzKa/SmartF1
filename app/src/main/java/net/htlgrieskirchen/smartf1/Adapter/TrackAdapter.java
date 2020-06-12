@@ -1,10 +1,13 @@
-package net.htlgrieskirchen.smartf1;
+package net.htlgrieskirchen.smartf1.Adapter;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import net.htlgrieskirchen.smartf1.Beans.Track;
+import net.htlgrieskirchen.smartf1.R;
 
 import java.util.List;
 

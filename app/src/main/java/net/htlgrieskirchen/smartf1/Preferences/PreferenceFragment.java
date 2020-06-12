@@ -1,4 +1,4 @@
-package net.htlgrieskirchen.smartf1.Preference;
+package net.htlgrieskirchen.smartf1.Preferences;
 
 import android.os.Bundle;
 
