@@ -3,7 +3,7 @@ package net.htlgrieskirchen.smartf1.Beans;
 
 public class Driver  {
 
-    private String driverid;
+    private String driverId;
     private String permanentNumber;
     private String code;
     private String url;
@@ -18,11 +18,11 @@ public class Driver  {
 
     @Override
     public String toString() {
-        return driverid+","+permanentNumber+","+code+","+url+","+givenName+","+familyName+","+dateOfBirth+","+nationality+","+constructors.toString()+","+seasonWins+","+seasonPoints;
+        return driverId +","+permanentNumber+","+code+","+url+","+givenName+","+familyName+","+dateOfBirth+","+nationality+","+constructors.toString()+","+seasonWins+","+seasonPoints;
     }
 
     public Driver(String driverId, String permanentNumber, String code, String url, String givenName, String familyName, String dateOfBirth, String nationality, Constructor[] constructors, String seasonWins, String seasonPoints) {
-        this.driverid = driverId;
+        this.driverId = driverId;
         this.permanentNumber = permanentNumber;
         this.code = code;
         this.url = url;
@@ -35,12 +35,12 @@ public class Driver  {
         this.seasonPoints = seasonPoints;
     }
 
-    public String getDriverid() {
-        return driverid;
+    public String getDriverId() {
+        return driverId;
     }
 
-    public void setDriverid(String driverid) {
-        this.driverid = driverid;
+    public void setDriverId(String driverId) {
+        this.driverId = driverId;
     }
 
     public String getPermanentNumber() {
