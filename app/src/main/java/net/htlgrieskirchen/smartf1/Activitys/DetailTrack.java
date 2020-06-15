@@ -123,7 +123,6 @@ public class DetailTrack extends AppCompatActivity {
                     return "ErrorCodeFromAPI";
                 }
             } catch (IOException | JSONException e) {
-                e.printStackTrace();
             }
             return sJsonResponse;
         }

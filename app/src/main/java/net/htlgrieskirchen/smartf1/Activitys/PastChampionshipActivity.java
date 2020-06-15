@@ -1,6 +1,8 @@
 package net.htlgrieskirchen.smartf1.Activitys;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -15,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -23,6 +26,9 @@ import com.google.gson.JsonParser;
 import net.htlgrieskirchen.smartf1.Adapter.DriverAdapter;
 import net.htlgrieskirchen.smartf1.Beans.Constructor;
 import net.htlgrieskirchen.smartf1.Beans.Driver;
+import net.htlgrieskirchen.smartf1.Fragments.ConstructorChampionshipFragment;
+import net.htlgrieskirchen.smartf1.Fragments.DriverChampionShipFragment;
+import net.htlgrieskirchen.smartf1.Fragments.LastRaceFragment;
 import net.htlgrieskirchen.smartf1.Preferences.PreferenceActivity;
 import net.htlgrieskirchen.smartf1.R;
 
@@ -39,6 +45,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
@@ -71,7 +78,6 @@ public class PastChampionshipActivity extends AppCompatActivity {
         arrayList = new ArrayList<>();
         driverList = new ArrayList<>();
 
-
         Calendar calendar = Calendar.getInstance();
         int now = calendar.get(Calendar.YEAR);
 
@@ -91,14 +97,32 @@ public class PastChampionshipActivity extends AppCompatActivity {
                 file = new File(path);
 
                 if (file.exists()){
-                    load(year);
+                    if(driverAdapter.isEmpty()){
+                        ServerTask st = new ServerTask(year, true);
+                        st.execute();
+                    }else{
+                      load(year);
+                    }
                 }else{
                     ServerTask st = new ServerTask(year, true);
                     st.execute();
                 }
+
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String driver = driverList.get(position).toString();
+                String result = Arrays.toString(driverList.get(position).getConstructors());
+                String constructor = result.replaceAll("[\\[\\]]","");
+                Intent intent = new Intent(PastChampionshipActivity.this, DetailDriver.class);
+                intent.putExtra("driver", driver);
+                intent.putExtra("constructor", constructor);
+                startActivity(intent);
             }
         });
     }
@@ -157,9 +181,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
-
             driverAdapter.notifyDataSetChanged();
-
         }
         @Override
         protected void onProgressUpdate(Integer... values) {
@@ -294,7 +316,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
             driverArrayList.clear();
             driverAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
-            e.printStackTrace();
+
         }
     }
     private String readExternalStorage(String year){
@@ -310,7 +332,6 @@ public class PastChampionshipActivity extends AppCompatActivity {
                     sb.append(line + "\n");
                 }
                 fis.close();
-                System.out.println(sb);
             } catch (IOException e) {
                 e.printStackTrace();
             }

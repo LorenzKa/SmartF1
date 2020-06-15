@@ -81,9 +81,7 @@ public class DriverChampionShipFragment extends Fragment {
             if (!checkPermission() && !Connection()){
                 Toast.makeText(getActivity(), "Sie müssen SD-Card Berechtigung hergeben oder eine Internetvebindung herstellen!", Toast.LENGTH_LONG).show();
             }
-            if (!driverAdapter.isEmpty()){
-                load();
-            }
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -268,7 +266,6 @@ public class DriverChampionShipFragment extends Fragment {
 
                 }
                 fis.close();
-                System.out.println(sb);
             } catch (IOException e) {
                 e.printStackTrace();
             }

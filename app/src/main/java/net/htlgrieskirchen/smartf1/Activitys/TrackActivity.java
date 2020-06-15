@@ -355,7 +355,7 @@ public class TrackActivity extends AppCompatActivity {
                     return "ErrorCodeFromAPI";
                 }
             } catch (IOException | JSONException e) {
-                e.printStackTrace();
+                doInBackground();
             }
             return jsonResponse;
         }
@@ -408,7 +408,6 @@ public class TrackActivity extends AppCompatActivity {
                     sb.append(line + "\n");
                 }
                 fis.close();
-                System.out.println(sb);
             } catch (IOException e) {
                 e.printStackTrace();
             }

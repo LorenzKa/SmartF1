@@ -53,6 +53,7 @@ public class DetailDriver extends AppCompatActivity {
     private TextView tvSport;
     private String LOG = MainActivity.class.toString();
     private Bitmap bitmap;
+    private String picName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,28 +65,24 @@ public class DetailDriver extends AppCompatActivity {
         constructor = intent.getStringExtra("constructor");
         splitNadd();
 
+        picName=arrayList.get(0).getGivenName()+"_"+arrayList.get(0).getFamilyName()+".jpg";
         initializeViews();
-
-        if (!fileExist(arrayList.get(0).getCode())) {
+        if (!fileExist(picName)) {
             if (Connection()) {
                     ServerTask st = new ServerTask(arrayList.get(0).getUrl().substring(29));
                     st.execute();
-            } else {
-                if (fileExist(arrayList.get(0).getCode())) {
+            }else{
+                if (fileExist(picName)) {
                     loadIMG();
                 } else {
                     Toast.makeText(this, "Stellen Sie eine Internetverbindung her um das Fahrerbild zu sehen/downloaden!", Toast.LENGTH_LONG).show();
                 }
             }
-        } else {
-            if (fileExist(arrayList.get(0).getCode())){
-                loadIMG();
-            }
+        }else{
+            loadIMG();
         }
-
-
-
     }
+
     public boolean fileExist(String fileName) {
         String path = "/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+fileName+".jpg";
         File file = new File(path);
@@ -171,7 +168,6 @@ public class DetailDriver extends AppCompatActivity {
 
                 }
             } catch (IOException | JSONException e) {
-                e.printStackTrace();
             }
             return sJsonResponse;
         }
@@ -187,7 +183,7 @@ public class DetailDriver extends AppCompatActivity {
         private String saveToInternalStorage(Bitmap bitmapImage) {
             ContextWrapper cw = new ContextWrapper(getApplicationContext());
             File directory = cw.getDir("drivers", Context.MODE_PRIVATE);
-            File mypath = new File(directory, arrayList.get(0).getCode() + ".jpg");
+            File mypath = new File(directory, arrayList.get(0).getGivenName()+"_"+arrayList.get(0).getFamilyName()+".jpg");
 
             FileOutputStream fos = null;
             try {
@@ -240,7 +236,7 @@ public class DetailDriver extends AppCompatActivity {
          tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
     }
     private void loadIMG(){
-         Bitmap bitmap = BitmapFactory.decodeFile("/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+arrayList.get(0).getCode()+".jpg");
+         Bitmap bitmap = BitmapFactory.decodeFile("/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+picName);
          imageView.setImageBitmap(bitmap);
     }
 
