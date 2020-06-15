@@ -51,7 +51,6 @@ public class DetailDriver extends AppCompatActivity {
     private TextView tvBiography;
     private TextView tvFacts;
     private TextView tvSport;
-    private String LOG = MainActivity.class.toString();
     private Bitmap bitmap;
     private String picName;
 
@@ -232,8 +231,20 @@ public class DetailDriver extends AppCompatActivity {
          imageView = findViewById(R.id.imageView);
          tvName.setText(arrayList.get(0).getGivenName()+" "+arrayList.get(0).getFamilyName().toUpperCase());
          tvBiography.setText("Geburtsdatum: "+formatDate()+"\n"+"Alter: "+calcAge()+"\nNationalität: "+arrayList.get(0).getNationality());
-         tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+arrayList.get(0).getCode()+"\nNummer: "+arrayList.get(0).getPermanentNumber());
-         tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
+        tvSport.setText("Siege: "+arrayList.get(0).getSeasonWins()+"\nPunkte: "+arrayList.get(0).getSeasonPoints());
+        String permNumber = arrayList.get(0).getPermanentNumber();
+        String code = arrayList.get(0).getCode();
+         if (code.equals("null")){
+             if (permNumber.equals("null")){
+                 tvFacts.setText("Konstrukteur: "+constructor+"\nCode: k.A.\nNummer: k.A.");
+             }else{
+                 tvFacts.setText("Konstrukteur: "+constructor+"\nCode: k.A.\nNummer: "+permNumber);
+             }
+         }else if(permNumber.equals("null")){
+             tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+code+"\nNummer: k.A.");
+         }else if (!permNumber.equals("null") && !code.equals("null")){
+             tvFacts.setText("Konstrukteur: "+constructor+"\nCode: "+code+"\nNummer: "+permNumber);
+         }
     }
     private void loadIMG(){
          Bitmap bitmap = BitmapFactory.decodeFile("/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+picName);
