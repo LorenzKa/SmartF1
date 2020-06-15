@@ -3,6 +3,7 @@ package net.htlgrieskirchen.smartf1.Fragments;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -36,6 +37,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -69,18 +71,29 @@ public class DriverChampionShipFragment extends Fragment {
         listView = (ListView) view.findViewById(R.id.listview_championship);
         listView.setAdapter(driverAdapter);
 
-
-
+        if(!checkPermission()){
+            ServerTask st = new ServerTask(true);
+            st.execute();
+        }else{
             if (Connection()){
-                ServerTask serverTask = new ServerTask(true);
-                serverTask.execute();
-            }else if(!Connection() && checkPermission()){
+                Calendar cal = Calendar.getInstance();
+                int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+                SharedPreferences sharedPreferences= getActivity().getSharedPreferences("syncDriverChampionShip", 0);
+                int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
+                if(dayOfYear != currentDayOfYear){
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("dayOfYear",  currentDayOfYear);
+                    editor.commit();
+                    ServerTask serverTask = new ServerTask(true);
+                    serverTask.execute();
+                }else{
+                    load();
+                }
+            } else{
                 load();
-                Toast.makeText(getActivity(), "Sie befinden sich im offline Modus!", Toast.LENGTH_LONG).show();
             }
-            if (!checkPermission() && !Connection()){
-                Toast.makeText(getActivity(), "Sie müssen SD-Card Berechtigung hergeben oder eine Internetvebindung herstellen!", Toast.LENGTH_LONG).show();
-            }
+        }
+
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -280,14 +293,6 @@ public class DriverChampionShipFragment extends Fragment {
     private boolean isExternalStorageWritable(){
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-            return true;
-        } else {
-            return false;
-        }
-    }
     private boolean Connection() {
         boolean Wifi = false;
         boolean Mobile = false;
@@ -306,5 +311,13 @@ public class DriverChampionShipFragment extends Fragment {
                 }
         }
         return Wifi || Mobile;
+    }
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
+        }
     }
 }

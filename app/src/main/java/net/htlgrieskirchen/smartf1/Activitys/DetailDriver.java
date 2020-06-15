@@ -83,7 +83,7 @@ public class DetailDriver extends AppCompatActivity {
     }
 
     public boolean fileExist(String fileName) {
-        String path = "/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+fileName+".jpg";
+        String path = "/data/data/net.htlgrieskirchen.smartf1/app_drivers/"+picName;
         File file = new File(path);
         return file.exists();
     }

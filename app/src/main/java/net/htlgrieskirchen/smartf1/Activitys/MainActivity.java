@@ -22,6 +22,13 @@ import net.htlgrieskirchen.smartf1.Fragments.LastRaceFragment;
 import net.htlgrieskirchen.smartf1.Preferences.PreferenceActivity;
 import net.htlgrieskirchen.smartf1.R;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class MainActivity extends AppCompatActivity {
 
     private MenuItem Mcurrent_championships;
@@ -37,11 +44,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-
-
-
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new
@@ -152,6 +154,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-
-
 }

@@ -1,7 +1,14 @@
 package net.htlgrieskirchen.smartf1.Fragments;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +16,7 @@ import android.widget.Adapter;
 import android.widget.ListView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.gson.Gson;
@@ -17,7 +25,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.htlgrieskirchen.smartf1.Adapter.DriverAdapter;
 import net.htlgrieskirchen.smartf1.Adapter.RaceAdapter;
+import net.htlgrieskirchen.smartf1.Beans.Constructor;
+import net.htlgrieskirchen.smartf1.Beans.Driver;
 import net.htlgrieskirchen.smartf1.Beans.RaceResult;
 import net.htlgrieskirchen.smartf1.Beans.Track;
 import net.htlgrieskirchen.smartf1.Beans.TrackLocation;
@@ -28,12 +39,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -44,6 +59,11 @@ public class LastRaceFragment extends Fragment {
     RaceAdapter adapter;
     List<RaceResult> raceResults;
     ListView listView;
+    private static final String FILE_NAME = "lastrace.json";
+    private File textFile;
+    private String jsonResponse;
+    List<RaceResult> privateResultList = new ArrayList<>();
+
 
     @Nullable
     @Override
@@ -53,8 +73,29 @@ public class LastRaceFragment extends Fragment {
         listView = view.findViewById(R.id.listview_lastrace);
         adapter = new RaceAdapter(getActivity(), R.layout.raceresult_item, raceResults);
         listView.setAdapter(adapter);
-        ServerTask st = new ServerTask();
-        st.execute();
+
+        if (!checkPermission()){
+            ServerTask st = new ServerTask();
+            st.execute();
+        }else{
+            if (Connection()){
+                Calendar cal = Calendar.getInstance();
+                int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+                SharedPreferences sharedPreferences= getActivity().getSharedPreferences("syncLastRace", 0);
+                int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
+                if(dayOfYear != currentDayOfYear){
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("dayOfYear",  currentDayOfYear);
+                    editor.commit();
+                    ServerTask st = new ServerTask();
+                    st.execute();
+                }else{
+                    load();
+                }
+            } else{
+                load();
+            }
+        }
         return view;
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
@@ -75,8 +116,6 @@ public class LastRaceFragment extends Fragment {
 
         @Override
         protected String doInBackground(String... strings) {
-            String jsonResponse;
-            List<RaceResult> privateResultList = new ArrayList<>();
             try {
                 HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/current/last/results.json").openConnection();
                 connection.setRequestMethod("GET");
@@ -106,7 +145,9 @@ public class LastRaceFragment extends Fragment {
                         privateResultList.add(trackClassed);
                     }
                     raceResults.addAll(privateResultList);
-                    //writeFile(trackList);
+                    if (checkPermission()){
+                        writeFile(jsonResponse);
+                    }
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -115,6 +156,104 @@ public class LastRaceFragment extends Fragment {
                 doInBackground();
             }
             return "jsonResponse";
+        }
+    }
+    private void writeFile(String response){
+        if(isExternalStorageWritable()){
+            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+            try {
+                textFile.createNewFile();
+                FileOutputStream output = new FileOutputStream(textFile);
+                output.write(response.getBytes());
+                output.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
+    private void load(){
+        String response = readExternalStorage();
+
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONObject mrdata = jsonObject.getJSONObject("MRData");
+            JSONObject raceTable = mrdata.getJSONObject("RaceTable");
+            JSONArray races = raceTable.getJSONArray("Races");
+            JSONObject race = races.getJSONObject(0);
+            JSONArray resultsArray = race.getJSONArray("Results");
+            JsonParser parser = new JsonParser();
+            GsonBuilder builder = new GsonBuilder();
+            Gson gson = builder.create();
+            for (int i = 0; i < resultsArray.length(); i++) {
+                JSONObject result = resultsArray.getJSONObject(i);
+                JsonElement resultString = parser.parse(result.toString());
+                RaceResult trackClassed = gson.fromJson(resultString, RaceResult.class);
+                privateResultList.add(trackClassed);
+            }
+            raceResults.addAll(privateResultList);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+    private String readExternalStorage(){
+        StringBuilder sb = new StringBuilder();
+
+        if (isExternalStorageReadable()){
+            try {
+                Environment.getExternalStorageDirectory();
+                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+                FileInputStream fis = new FileInputStream(file);
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader br = new BufferedReader(isr);
+
+                String line;
+                while((line = br.readLine()) != null){
+
+                    sb.append(line + "\n");
+
+                }
+                fis.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return String.valueOf(sb);
+    }
+    private boolean isExternalStorageReadable() {
+        String state = Environment.getExternalStorageState();
+        return Environment.MEDIA_MOUNTED.equals(state) ||
+                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
+    }
+    private boolean isExternalStorageWritable(){
+        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    }
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
+    }
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
         }
     }
 }

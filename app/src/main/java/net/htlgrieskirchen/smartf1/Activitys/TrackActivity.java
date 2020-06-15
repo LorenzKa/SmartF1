@@ -18,6 +18,8 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,6 +39,7 @@ import com.google.gson.JsonParser;
 import net.htlgrieskirchen.smartf1.Adapter.TrackAdapter;
 import net.htlgrieskirchen.smartf1.Beans.Track;
 import net.htlgrieskirchen.smartf1.Beans.TrackLocation;
+import net.htlgrieskirchen.smartf1.Fragments.DriverChampionShipFragment;
 import net.htlgrieskirchen.smartf1.R;
 
 import org.json.JSONArray;
@@ -52,6 +55,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
@@ -86,23 +90,33 @@ public class TrackActivity extends AppCompatActivity {
         prefs = PreferenceManager.getDefaultSharedPreferences(this );
 
 
-        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
 
-        if (checkPermission()) {
-            if (textFile.exists()) {
-                load();
-            } else {
-                for (int i = 1; i < 22; i++) {
-                    ServerTask s = new ServerTask(String.valueOf(i));
-                    s.execute();
-                }
+        if(!checkPermission()){
+            for (int i = 1; i < 22; i++) {
+                ServerTask s = new ServerTask(String.valueOf(i));
+                s.execute();
             }
         }else{
-                for (int i = 1; i < 22; i++) {
-                    ServerTask s = new ServerTask(String.valueOf(i));
-                    s.execute();
+            if (Connection()){
+                Calendar cal = Calendar.getInstance();
+                int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
+                SharedPreferences sharedPreferences= this.getSharedPreferences("syncTracks", 0);
+                int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
+                if(dayOfYear != currentDayOfYear){
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putInt("dayOfYear",  currentDayOfYear);
+                    editor.commit();
+                    for (int i = 1; i < 22; i++) {
+                        ServerTask s = new ServerTask(String.valueOf(i));
+                        s.execute();
+                    }
+                }else{
+                    load();
                 }
+            } else{
+                load();
             }
+        }
         if((checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED&&prefs.getBoolean("notification", true))){
             gps();
@@ -313,7 +327,7 @@ public class TrackActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
             List<Track> privateTrackList = new ArrayList<>();
             try {
-                HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/2019/" + number + "/circuits.json").openConnection();
+                HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/current/" + number + "/circuits.json").openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Content-Type", "application/json");
                 int responseCode = connection.getResponseCode();
@@ -347,9 +361,10 @@ public class TrackActivity extends AppCompatActivity {
                         trackClassed.setLocation(location1);
                         privateTrackList.add(trackClassed);
                     }
-                    //   trackList = new ArrayList<>();
                     trackList.addAll(privateTrackList);
-                    writeFile(trackList);
+                    if (checkPermission()){
+                        writeFile(trackList);
+                    }
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -453,6 +468,25 @@ public class TrackActivity extends AppCompatActivity {
         Intent myIntent = new Intent(this, MainActivity.class);
         startActivity(myIntent);
         return true;
+    }
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
     }
 
 

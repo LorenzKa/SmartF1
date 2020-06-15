@@ -2,9 +2,15 @@ package net.htlgrieskirchen.smartf1.Activitys;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -49,6 +55,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.sql.ConnectionPoolDataSource;
+
 import static android.widget.Toast.LENGTH_LONG;
 
 public class PastChampionshipActivity extends AppCompatActivity {
@@ -67,12 +75,12 @@ public class PastChampionshipActivity extends AppCompatActivity {
     private File file;
     private String path;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_past_champion_ship);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         spinner = findViewById(R.id.spinner);
         listView = (ListView) findViewById(R.id.listview_past);
         arrayList = new ArrayList<>();
@@ -95,19 +103,30 @@ public class PastChampionshipActivity extends AppCompatActivity {
                 year = spinner.getSelectedItem().toString();
                 path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/pastchampionships/" + year + ".json";
                 file = new File(path);
-
-                if (file.exists()){
-                    if(driverAdapter.isEmpty()){
-                        ServerTask st = new ServerTask(year, true);
-                        st.execute();
-                    }else{
-                      load(year);
-                    }
-                }else{
-                    ServerTask st = new ServerTask(year, true);
-                    st.execute();
-                }
-
+               if (checkPermission()){
+                   if (file.exists()){
+                       load(year);
+                       if (driverList.isEmpty()){
+                           if (!Connection()) {
+                               Toast.makeText(PastChampionshipActivity.this, "Stellen Sie eine Internetverbindung her!", Toast.LENGTH_SHORT).show();
+                           }
+                       }
+                       else{
+                           ServerTask st = new ServerTask(year, true);
+                           st.execute();
+                       }
+                   }else{
+                       ServerTask st = new ServerTask(year, true);
+                       st.execute();
+                   }
+               }else{
+                   if (!Connection()){
+                       Toast.makeText(PastChampionshipActivity.this, "Stellen Sie eine Internetverbindung her!", Toast.LENGTH_SHORT).show();
+                   }else{
+                       ServerTask st = new ServerTask(year,true);
+                       st.execute();
+                   }
+               }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -245,7 +264,9 @@ public class PastChampionshipActivity extends AppCompatActivity {
                             }
                             reader.close();
                             driverList.addAll(driverArrayList);
-                            writeFile(jsonResponse);
+                            if (checkPermission()){
+                                writeFile(jsonResponse);
+                            }
                             return jsonResponse;
                         } else {
                             return "ErrorCodeFromAPI";
@@ -345,5 +366,37 @@ public class PastChampionshipActivity extends AppCompatActivity {
     }
     private boolean isExternalStorageWritable(){
         return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+    }
+    private boolean checkPermission(){
+        int result = ContextCompat.checkSelfPermission(PastChampionshipActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
+        if (result == PackageManager.PERMISSION_GRANTED){
+            return true;
+        } else {
+            return false;
+        }
+    }
+    private boolean Connection() {
+        boolean Wifi = false;
+        boolean Mobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo NI : netInfo) {
+            if (NI.getTypeName().equalsIgnoreCase("WIFI")) {
+                if (NI.isConnected()) {
+                    Wifi = true;
+                }
+            }
+            if (NI.getTypeName().equalsIgnoreCase("MOBILE"))
+                if (NI.isConnected()) {
+                    Mobile = true;
+                }
+        }
+        return Wifi || Mobile;
+    }
+    public boolean onOptionsItemSelected(MenuItem item){
+        Intent myIntent = new Intent(this, MainActivity.class);
+        startActivity(myIntent);
+        return true;
     }
 }
