@@ -2,6 +2,7 @@ package net.htlgrieskirchen.smartf1.Fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -55,8 +56,6 @@ public class DriverChampionShipFragment extends Fragment {
     private ListView listView;
     private List<Driver> driverList;
     private List<Driver> driverArrayList;
-    private static final String FILE_NAME = "drivers.json";
-    private File textFile;
     private DriverAdapter driverAdapter;
     private String jsonResponse;
     @Nullable
@@ -66,33 +65,32 @@ public class DriverChampionShipFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_championship, container, false);
         driverArrayList = new ArrayList<>();
         driverList = new ArrayList<>();
-        textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
         driverAdapter = new DriverAdapter(getActivity(), R.layout.championship_item, driverList);
         listView = (ListView) view.findViewById(R.id.listview_championship);
         listView.setAdapter(driverAdapter);
 
-        if(!checkPermission()){
-            ServerTask st = new ServerTask(true);
-            st.execute();
-        }else{
-            if (Connection()){
+            if (Connection()) {
                 Calendar cal = Calendar.getInstance();
                 int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-                SharedPreferences sharedPreferences= getActivity().getSharedPreferences("syncDriverChampionShip", 0);
+                SharedPreferences sharedPreferences = getActivity().getSharedPreferences("syncDriverChampionShip", 0);
                 int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
-                if(dayOfYear != currentDayOfYear){
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("dayOfYear",  currentDayOfYear);
-                    editor.commit();
-                    ServerTask serverTask = new ServerTask(true);
-                    serverTask.execute();
+                if (dayOfYear != currentDayOfYear) {
+                    File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_results/driver.json");
+                    if (file.exists()){
+                        file.delete();
+                    }else{
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putInt("dayOfYear", currentDayOfYear);
+                        editor.commit();
+                        ServerTask serverTask = new ServerTask(true);
+                        serverTask.execute();
+                    }
                 }else{
                     load();
                 }
-            } else{
+            }else{
                 load();
-            }
-        }
+             }
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -192,7 +190,7 @@ public class DriverChampionShipFragment extends Fragment {
                             driverArrayList.add(driverClassed);
                         }
                         driverList.addAll(driverArrayList);
-                        writeFile(jsonResponse);
+                        save(jsonResponse);
                         return jsonResponse;
                     } else {
                         return "ErrorCodeFromAPI";
@@ -205,22 +203,27 @@ public class DriverChampionShipFragment extends Fragment {
             return sJsonResponse;
         }
     }
-    private void writeFile(String response){
-        if(isExternalStorageWritable()){
-            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+    private void save(String data) {
+        ContextWrapper cw = new ContextWrapper(getActivity());
+        File directory = cw.getDir("results", Context.MODE_PRIVATE);
+        File mypath = new File(directory, "driver.json");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            fos.write(data.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             try {
-                textFile.createNewFile();
-                FileOutputStream output = new FileOutputStream(textFile);
-                output.write(response.getBytes());
-                output.close();
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
     private void load(){
-        String response = readExternalStorage();
+        String response = readStorageString();
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONObject mrdata = jsonObject.getJSONObject("MRData");
@@ -261,37 +264,23 @@ public class DriverChampionShipFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private String readExternalStorage(){
+    private String readStorageString(){
         StringBuilder sb = new StringBuilder();
 
-        if (isExternalStorageReadable()){
-            try {
-                Environment.getExternalStorageDirectory();
-                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-                FileInputStream fis = new FileInputStream(file);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr);
-
-                String line;
-                while((line = br.readLine()) != null){
-
-                    sb.append(line + "\n");
-
-                }
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_results/driver.json");
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while((line = br.readLine()) != null){
+                sb.append(line + "\n");
             }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return String.valueOf(sb);
-    }
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-    }
-    private boolean isExternalStorageWritable(){
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
     private boolean Connection() {
         boolean Wifi = false;
@@ -311,13 +300,5 @@ public class DriverChampionShipFragment extends Fragment {
                 }
         }
         return Wifi || Mobile;
-    }
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-            return true;
-        } else {
-            return false;
-        }
     }
 }

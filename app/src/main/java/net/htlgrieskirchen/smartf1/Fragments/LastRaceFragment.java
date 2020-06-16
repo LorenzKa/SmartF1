@@ -2,6 +2,7 @@ package net.htlgrieskirchen.smartf1.Fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -59,8 +60,6 @@ public class LastRaceFragment extends Fragment {
     RaceAdapter adapter;
     List<RaceResult> raceResults;
     ListView listView;
-    private static final String FILE_NAME = "lastrace.json";
-    private File textFile;
     private String jsonResponse;
     List<RaceResult> privateResultList = new ArrayList<>();
 
@@ -74,28 +73,28 @@ public class LastRaceFragment extends Fragment {
         adapter = new RaceAdapter(getActivity(), R.layout.raceresult_item, raceResults);
         listView.setAdapter(adapter);
 
-        if (!checkPermission()){
-            ServerTask st = new ServerTask();
-            st.execute();
-        }else{
             if (Connection()){
                 Calendar cal = Calendar.getInstance();
                 int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
                 SharedPreferences sharedPreferences= getActivity().getSharedPreferences("syncLastRace", 0);
                 int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
                 if(dayOfYear != currentDayOfYear){
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("dayOfYear",  currentDayOfYear);
-                    editor.commit();
-                    ServerTask st = new ServerTask();
-                    st.execute();
+                    File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_results/lastrace.json");
+                    if (file.exists()){
+                        file.delete();
+                    }else {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putInt("dayOfYear", currentDayOfYear);
+                        editor.commit();
+                        ServerTask st = new ServerTask();
+                        st.execute();
+                    }
                 }else{
                     load();
                 }
-            } else{
+            }else{
                 load();
             }
-        }
         return view;
     }
     public class ServerTask extends AsyncTask<String, Integer, String> {
@@ -145,9 +144,7 @@ public class LastRaceFragment extends Fragment {
                         privateResultList.add(trackClassed);
                     }
                     raceResults.addAll(privateResultList);
-                    if (checkPermission()){
-                        writeFile(jsonResponse);
-                    }
+                        save(jsonResponse);
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -158,22 +155,27 @@ public class LastRaceFragment extends Fragment {
             return "jsonResponse";
         }
     }
-    private void writeFile(String response){
-        if(isExternalStorageWritable()){
-            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
+    private void save(String data) {
+        ContextWrapper cw = new ContextWrapper(getActivity());
+        File directory = cw.getDir("results", Context.MODE_PRIVATE);
+        File mypath = new File(directory, "lastrace.json");
+
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            fos.write(data.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             try {
-                textFile.createNewFile();
-                FileOutputStream output = new FileOutputStream(textFile);
-                output.write(response.getBytes());
-                output.close();
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
     private void load(){
-        String response = readExternalStorage();
+        String response = readStorageString();
 
         try {
             JSONObject jsonObject = new JSONObject(response);
@@ -197,37 +199,22 @@ public class LastRaceFragment extends Fragment {
             e.printStackTrace();
         }
     }
-    private String readExternalStorage(){
+    private String readStorageString(){
         StringBuilder sb = new StringBuilder();
-
-        if (isExternalStorageReadable()){
-            try {
-                Environment.getExternalStorageDirectory();
-                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-                FileInputStream fis = new FileInputStream(file);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr);
-
-                String line;
-                while((line = br.readLine()) != null){
-
-                    sb.append(line + "\n");
-
-                }
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_results/lastrace.json");
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while((line = br.readLine()) != null){
+                sb.append(line + "\n");
             }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return String.valueOf(sb);
-    }
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-    }
-    private boolean isExternalStorageWritable(){
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
     }
     private boolean Connection() {
         boolean Wifi = false;
@@ -247,13 +234,5 @@ public class LastRaceFragment extends Fragment {
                 }
         }
         return Wifi || Mobile;
-    }
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-            return true;
-        } else {
-            return false;
-        }
     }
 }

@@ -6,7 +6,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
@@ -72,8 +75,6 @@ public class PastChampionshipActivity extends AppCompatActivity {
     private ArrayList<Driver> driverList;
     private DriverAdapter driverAdapter;
     private String year;
-    private File file;
-    private String path;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,7 @@ public class PastChampionshipActivity extends AppCompatActivity {
 
         for (int i = now-1; i > 1949; i--) {
             arrayList.add(i);
+            ServerTask st = new ServerTask(String.valueOf(i), true);
         }
         driverAdapter = new DriverAdapter(this, R.layout.championship_item, driverList);
         spinner.setAdapter(new ArrayAdapter<Integer>(this, R.layout.spinneritem, arrayList));
@@ -101,32 +103,15 @@ public class PastChampionshipActivity extends AppCompatActivity {
                 driverList.clear();
                 driverArrayList.clear();
                 year = spinner.getSelectedItem().toString();
-                path = Environment.getExternalStorageDirectory().getAbsolutePath() + "/pastchampionships/" + year + ".json";
-                file = new File(path);
-               if (checkPermission()){
-                   if (file.exists()){
-                       load(year);
-                       if (driverList.isEmpty()){
-                           if (!Connection()) {
-                               Toast.makeText(PastChampionshipActivity.this, "Stellen Sie eine Internetverbindung her!", Toast.LENGTH_SHORT).show();
-                           }
-                       }
-                       else{
-                           ServerTask st = new ServerTask(year, true);
-                           st.execute();
-                       }
-                   }else{
-                       ServerTask st = new ServerTask(year, true);
-                       st.execute();
-                   }
-               }else{
-                   if (!Connection()){
-                       Toast.makeText(PastChampionshipActivity.this, "Stellen Sie eine Internetverbindung her!", Toast.LENGTH_SHORT).show();
-                   }else{
-                       ServerTask st = new ServerTask(year,true);
-                       st.execute();
-                   }
-               }
+                File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_pastchampionships/"+year+".json");
+                if (file.exists()){
+                    load(year);
+                }else if (Connection() && !file.exists()){
+                    ServerTask st = new ServerTask(year, true);
+                    st.execute();
+                }else if (!Connection() && !file.exists()){
+                    Toast.makeText(PastChampionshipActivity.this, "Stellen Sie eine Internetverbindung her!", LENGTH_LONG).show();
+                }
             }
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
@@ -262,14 +247,11 @@ public class PastChampionshipActivity extends AppCompatActivity {
                                 driverClassed.setConstructors(constructorsArray);
                                 driverArrayList.add(driverClassed);
                             }
-                            reader.close();
                             driverList.addAll(driverArrayList);
-                            if (checkPermission()){
-                                writeFile(jsonResponse);
-                            }
+                            save(jsonResponse);
                             return jsonResponse;
                         } else {
-                            return "ErrorCodeFromAPI";
+                            doInBackground();
                         }
                     } catch (IOException | JSONException e) {
                         doInBackground();
@@ -280,25 +262,27 @@ public class PastChampionshipActivity extends AppCompatActivity {
         }
     }
 
-    private void writeFile(String response){
-        if(isExternalStorageWritable()){
-            File sd = Environment.getExternalStorageDirectory();
-            String path = sd.getAbsolutePath() + "/pastchampionships";
-            file = new File(path);
-            file.mkdir();
-            file = new File(path+"/"+year+".json");
+    private void save(String data){
+        ContextWrapper cw = new ContextWrapper(getBaseContext());
+        File directory = cw.getDir("pastchampionships", Context.MODE_PRIVATE);
+        File mypath = new File(directory, year+".json");
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            fos.write(data.getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             try {
-                file.createNewFile();
-                FileOutputStream output = new FileOutputStream(file);
-                output.write(response.getBytes());
-                output.close();
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-    }
+        }
+
     private void load(String year){
-        String response = readExternalStorage(year);
+        String response = readStorageString(year);
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONObject mrdata = jsonObject.getJSONObject("MRData");
@@ -334,46 +318,27 @@ public class PastChampionshipActivity extends AppCompatActivity {
                 driverArrayList.add(driverClassed);
             }
             driverList.addAll(driverArrayList);
-            driverArrayList.clear();
             driverAdapter.notifyDataSetChanged();
         } catch (JSONException e) {
 
         }
     }
-    private String readExternalStorage(String year){
+    private String readStorageString(String year){
         StringBuilder sb = new StringBuilder();
-        file = new File( Environment.getExternalStorageDirectory().getAbsolutePath() + "/pastchampionships/" + year + ".json");
-        if (isExternalStorageReadable()){
-            try {
-                FileInputStream fis = new FileInputStream(file);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr);
-                String line;
-                while((line = br.readLine()) != null){
-                    sb.append(line + "\n");
-                }
-                fis.close();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_pastchampionships/"+year+".json");
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while((line = br.readLine()) != null){
+                sb.append(line + "\n");
             }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return String.valueOf(sb);
-    }
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-    }
-    private boolean isExternalStorageWritable(){
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-    }
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(PastChampionshipActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-            return true;
-        } else {
-            return false;
-        }
     }
     private boolean Connection() {
         boolean Wifi = false;

@@ -10,6 +10,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -30,6 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -54,8 +56,10 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class TrackActivity extends AppCompatActivity {
@@ -89,34 +93,19 @@ public class TrackActivity extends AppCompatActivity {
         listView = findViewById(R.id.listview_track);
         prefs = PreferenceManager.getDefaultSharedPreferences(this );
 
-
-
-        if(!checkPermission()){
-            for (int i = 1; i < 22; i++) {
-                ServerTask s = new ServerTask(String.valueOf(i));
-                s.execute();
-            }
+        File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_tracks/tracks.json");
+        if (file.exists()){
+            load();
         }else{
-            if (Connection()){
-                Calendar cal = Calendar.getInstance();
-                int currentDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-                SharedPreferences sharedPreferences= this.getSharedPreferences("syncTracks", 0);
-                int dayOfYear = sharedPreferences.getInt("dayOfYear", 0);
-                if(dayOfYear != currentDayOfYear){
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putInt("dayOfYear",  currentDayOfYear);
-                    editor.commit();
-                    for (int i = 1; i < 22; i++) {
-                        ServerTask s = new ServerTask(String.valueOf(i));
-                        s.execute();
-                    }
-                }else{
-                    load();
-                }
-            } else{
-                load();
+            if (Connection()) {
+                    ServerTask st = new ServerTask();
+                    st.execute();
+            }else{
+                Toast.makeText(TrackActivity.this, "Stellen Sie eine Internetvebindung her!", Toast.LENGTH_LONG).show();
             }
         }
+
+
         if((checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED&&prefs.getBoolean("notification", true))){
             gps();
@@ -302,11 +291,7 @@ public class TrackActivity extends AppCompatActivity {
     }
 
     public class ServerTask extends AsyncTask<String, Integer, String> {
-        private String number;
 
-        public ServerTask(String number) {
-            this.number = number;
-        }
 
         @Override
         protected void onPreExecute() {
@@ -327,7 +312,8 @@ public class TrackActivity extends AppCompatActivity {
         protected String doInBackground(String... strings) {
             List<Track> privateTrackList = new ArrayList<>();
             try {
-                HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/current/" + number + "/circuits.json").openConnection();
+
+                HttpURLConnection connection = (HttpURLConnection) new URL("http://ergast.com/api/f1/current/circuits.json").openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Content-Type", "application/json");
                 int responseCode = connection.getResponseCode();
@@ -362,9 +348,7 @@ public class TrackActivity extends AppCompatActivity {
                         privateTrackList.add(trackClassed);
                     }
                     trackList.addAll(privateTrackList);
-                    if (checkPermission()){
                         writeFile(trackList);
-                    }
                     return jsonResponse;
                 } else {
                     return "ErrorCodeFromAPI";
@@ -383,49 +367,43 @@ public class TrackActivity extends AppCompatActivity {
         intent.putExtra("location", location);
         startActivity(intent);
     }
-
-    private boolean isExternalStorageReadable() {
-        String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state) ||
-                Environment.MEDIA_MOUNTED_READ_ONLY.equals(state);
-    }
-
-    private boolean isExternalStorageWritable() {
-        return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
-    }
-
     private void writeFile(List<Track> trackArrayList) {
-        if (isExternalStorageWritable()) {
-            textFile = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-            try {
-                textFile.createNewFile();
-                String json = new Gson().toJson(trackArrayList);
-                FileOutputStream output = new FileOutputStream(textFile);
-                output.write(json.getBytes());
-                output.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-        }
-    }
-    private String readExternalStorage() {
-        StringBuilder sb = new StringBuilder();
-        if (isExternalStorageReadable()) {
+        ContextWrapper cw = new ContextWrapper(getBaseContext());
+        File directory = cw.getDir("tracks", Context.MODE_PRIVATE);
+        File mypath = new File(directory, "tracks.json");
+        String data = new Gson().toJson(trackArrayList);
+        FileOutputStream fos = null;
+        try {
+            fos = new FileOutputStream(mypath);
+            fos.write(data.getBytes());
+            fos.flush();
+            fos.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
             try {
-                Environment.getExternalStorageDirectory();
-                File file = new File(Environment.getExternalStorageDirectory(), FILE_NAME);
-                FileInputStream fis = new FileInputStream(file);
-                InputStreamReader isr = new InputStreamReader(fis);
-                BufferedReader br = new BufferedReader(isr);
-                String line;
-                while ((line = br.readLine()) != null) {
-                    sb.append(line + "\n");
-                }
-                fis.close();
+                fos.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        }
+    private String readStorageString(){
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            File file = new File("/data/data/net.htlgrieskirchen.smartf1/app_tracks/tracks.json");
+            FileInputStream fis = new FileInputStream(file);
+            InputStreamReader isr = new InputStreamReader(fis);
+            BufferedReader br = new BufferedReader(isr);
+            String line;
+            while((line = br.readLine()) != null){
+                sb.append(line + "\n");
+            }
+            fis.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return String.valueOf(sb);
     }
@@ -433,7 +411,7 @@ public class TrackActivity extends AppCompatActivity {
     private void load() {
         try {
             List<Track> privateTrackList = new ArrayList<>();
-            response = readExternalStorage();
+            response = readStorageString();
             trackList = new ArrayList<>();
             JSONArray jsonArray = new JSONArray(response);
             JsonParser parser = new JsonParser();
@@ -455,14 +433,6 @@ public class TrackActivity extends AppCompatActivity {
             st2.execute();
         }
 
-    }
-    private boolean checkPermission(){
-        int result = ContextCompat.checkSelfPermission(TrackActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED){
-            return true;
-        } else {
-            return false;
-        }
     }
     public boolean onOptionsItemSelected(MenuItem item){
         Intent myIntent = new Intent(this, MainActivity.class);
